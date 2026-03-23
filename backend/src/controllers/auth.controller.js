@@ -220,7 +220,7 @@ const login = asyncHandler(async (req, res) => {
         existingSession.latestLogin = new Date();
         existingSession.isActive = true;
 
-        console.log(`Session reused | Device: ${device}`);
+        // console.log(`Session reused | Device: ${device}`);
     } else {
         // create new session
         sessionId = generateSessionId();
@@ -235,7 +235,7 @@ const login = asyncHandler(async (req, res) => {
             isActive: true,
         });
 
-        console.log(`New session created | Device: ${device}`);
+        // console.log(`New session created | Device: ${device}`);
     }
 
     const accessToken = generateAccessToken(user);

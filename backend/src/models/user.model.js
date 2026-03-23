@@ -11,7 +11,6 @@ const sessionSchema = new mongoose.Schema({
 
 const addressSchema = new Schema(
   {
-    street: { type: String, trim: true, default: null },
     city: { type: String, trim: true, default: null },
     state: { type: String, trim: true, default: null },
     country: { type: String, trim: true, default: null },
@@ -27,7 +26,7 @@ const userSchema = new Schema(
       required: true,
       trim: true,
       minlength: [3, 'Name must be at least 3 characters long'],
-      maxlength: [50, 'Name cannot exceed 50 characters']
+      maxlength: [30, 'Name cannot exceed 50 characters']
     },
     email: {
       type: String,
@@ -38,7 +37,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      minlength: [6, 'Password must be at least 6 characters long'],
+      minlength: [8, 'Password must be at least 8 characters long'],
       select: false,
     },
     role: {

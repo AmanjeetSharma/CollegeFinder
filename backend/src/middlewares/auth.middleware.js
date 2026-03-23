@@ -49,9 +49,9 @@ export const verifyToken = asyncHandler(async (req, res, next) => {
 
 
 
-export const authorizeRoles = (...roles) => {
+export const authRole = (role) => {
     return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
+        if (!req.user.roles.includes(role)) {
             throw new ApiError(403, "Access denied");
         }
         next();

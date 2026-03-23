@@ -23,11 +23,13 @@ app.use(cookieParser());
 // Import routes
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import passwordRoutes from "./routes/password.routes.js";
 
 
 // Use routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/password", passwordRoutes);
 
 
 // Error handling middleware
