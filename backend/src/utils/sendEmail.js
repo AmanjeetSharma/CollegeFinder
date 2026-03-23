@@ -10,12 +10,6 @@ import nodemailer from "nodemailer";
 
 const sendEmail = async (to, subject, content, isHtml = false) => {
     try {
-        console.log("SMTP DEBUG 👉", {
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS ? "EXISTS" : "MISSING",
-        });
         // 1. Create transporter
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST, // e.g. smtp.gmail.com
@@ -38,11 +32,11 @@ const sendEmail = async (to, subject, content, isHtml = false) => {
         // 3. Send email
         const info = await transporter.sendMail(mailOptions);
 
-        console.log("✅ Email sent:", info.messageId);
+        console.log(`Email sent to ${to} | Message ID: ${info.messageId}`);
 
         return info;
     } catch (error) {
-        console.error("❌ Email error:", error);
+        console.error("Email error:", error);
         throw new Error("Email could not be sent");
     }
 };

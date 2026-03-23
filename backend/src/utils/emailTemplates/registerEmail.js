@@ -6,7 +6,7 @@ const registerEmail = (url) => {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Verify Your Email</title>
+            <title>Verify Your Email - Career Advisor</title>
             <style>
                 body {
                     margin: 0;
@@ -30,13 +30,13 @@ const registerEmail = (url) => {
                 }
                 
                 .header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
                     padding: 40px 30px;
                     text-align: center;
                 }
                 
                 .logo {
-                    font-size: 32px;
+                    font-size: 28px;
                     font-weight: bold;
                     color: #ffffff;
                     margin-bottom: 10px;
@@ -44,7 +44,13 @@ const registerEmail = (url) => {
                 
                 .logo span {
                     font-weight: normal;
-                    color: #ffd700;
+                    color: #ffd966;
+                }
+                
+                .tagline {
+                    color: rgba(255,255,255,0.9);
+                    font-size: 14px;
+                    margin-top: 8px;
                 }
                 
                 .content {
@@ -60,7 +66,7 @@ const registerEmail = (url) => {
                 
                 .message {
                     color: #4b5563;
-                    margin-bottom: 30px;
+                    margin-bottom: 20px;
                     font-size: 16px;
                 }
                 
@@ -71,7 +77,7 @@ const registerEmail = (url) => {
                 
                 .verify-button {
                     display: inline-block;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
                     color: #ffffff !important;
                     text-decoration: none;
                     padding: 14px 32px;
@@ -84,7 +90,7 @@ const registerEmail = (url) => {
                 
                 .verify-button:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+                    box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4);
                 }
                 
                 .alt-link {
@@ -95,7 +101,7 @@ const registerEmail = (url) => {
                 }
                 
                 .alt-link a {
-                    color: #667eea;
+                    color: #1e3c72;
                     text-decoration: none;
                     word-break: break-all;
                 }
@@ -104,18 +110,40 @@ const registerEmail = (url) => {
                     text-decoration: underline;
                 }
                 
-                .info-box {
+                .features-grid {
                     background-color: #f9fafb;
-                    border-left: 4px solid #667eea;
+                    padding: 20px;
+                    margin: 25px 0;
+                    border-radius: 12px;
+                }
+                
+                .feature-item {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 12px;
+                    color: #4b5563;
+                    font-size: 14px;
+                }
+                
+                .feature-icon {
+                    font-size: 18px;
+                    margin-right: 12px;
+                    min-width: 24px;
+                }
+                
+                .info-box {
+                    background-color: #e8f0fe;
+                    border-left: 4px solid #1e3c72;
                     padding: 15px 20px;
                     margin: 25px 0;
                     border-radius: 8px;
                 }
                 
                 .info-text {
-                    color: #4b5563;
+                    color: #1e3c72;
                     font-size: 14px;
                     margin: 0;
+                    font-weight: 500;
                 }
                 
                 .footer {
@@ -142,6 +170,11 @@ const registerEmail = (url) => {
                     font-size: 12px;
                 }
                 
+                .highlight {
+                    color: #1e3c72;
+                    font-weight: 600;
+                }
+                
                 @media only screen and (max-width: 480px) {
                     .content {
                         padding: 30px 20px;
@@ -163,26 +196,26 @@ const registerEmail = (url) => {
                 <div class="email-wrapper">
                     <div class="header">
                         <div class="logo">
-                            Queue<span>INDIA</span>
+                            Career<span>Guide</span>
                         </div>
-                        <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-top: 8px;">
-                            Streamlining Queues, Enhancing Experience
+                        <div class="tagline">
+                            Your Personalized Path to Success
                         </div>
                     </div>
                     
                     <div class="content">
                         <div class="greeting">
-                            Welcome to QueueINDIA! 🎉
+                            Welcome to CollegeFinder! 🎓
                         </div>
                         
                         <div class="message">
-                            Thank you for choosing QueueINDIA. We're excited to have you on board! 
-                            To get started and access all our features, please verify your email address.
+                            Thank you for joining India's premier career guidance platform for Class 10th & 12th students. 
+                            We're excited to help you discover your perfect career path!
                         </div>
                         
                         <div class="button-container">
                             <a href="${url}" class="verify-button">
-                                Verify Email Address
+                                Verify Your Email
                             </a>
                         </div>
                         
@@ -191,19 +224,42 @@ const registerEmail = (url) => {
                             <a href="${url}">${url}</a>
                         </div>
                         
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <span class="feature-icon">🧠</span>
+                                <span><strong>Aptitude-Based Tests</strong> - Discover your strengths and interests</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🤖</span>
+                                <span><strong>AI-Powered Recommendations</strong> - Personalized subject streams & career paths</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🏛️</span>
+                                <span><strong>College & Scholarship Info</strong> - Government colleges, entrance exams, scholarships</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">📱</span>
+                                <span><strong>SMS Verified Access</strong> - Secure & authenticated user experience</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">📊</span>
+                                <span><strong>Progress Tracking</strong> - Stay on top with reminders & updates</span>
+                            </div>
+                        </div>
+                        
                         <div class="info-box">
                             <p class="info-text">
-                                <strong>✨ Why verify?</strong><br>
-                                • Secure your account<br>
-                                • Get real-time queue updates<br>
-                                • Receive priority notifications<br>
-                                • Access exclusive features
+                                ⭐ <strong>What awaits you after verification:</strong><br>
+                                • Personalized career recommendations based on your abilities<br>
+                                • Access to entrance exam eligibility tools<br>
+                                • Real-time updates on admissions & results<br>
+                                • Smart progress tracking with timely reminders
                             </p>
                         </div>
                         
-                        <div class="message" style="font-size: 14px; margin-top: 25px;">
-                            This verification link will expire in 24 hours for your security.
-                            If you didn't create an account with QueueINDIA, you can safely ignore this email.
+                        <div class="message" style="font-size: 14px; margin-top: 25px; background-color: #fff3e0; padding: 12px; border-radius: 8px;">
+                            🔒 <strong>Security Notice:</strong> This verification link will expire in 24 hours. 
+                            If you didn't register for CollegeFinder, please ignore this email.
                         </div>
                     </div>
                     
@@ -211,14 +267,16 @@ const registerEmail = (url) => {
                         <div class="social-links">
                             <a href="#">Help Center</a> •
                             <a href="#">Privacy Policy</a> •
-                            <a href="#">Terms of Service</a>
+                            <a href="#">Terms of Service</a> •
+                            <a href="#">Contact Us</a>
                         </div>
                         <p class="footer-text">
-                            © 2024 QueueINDIA. All rights reserved.<br>
-                            Making queues smarter, one step at a time.
+                            © 2024 CollegeFinder. All rights reserved.<br>
+                            Empowering students to make informed career decisions
                         </p>
                         <p class="footer-text" style="font-size: 11px;">
-                            This is an automated message, please do not reply to this email.
+                            This is an automated message from CollegeFinder - Your trusted career advisor.<br>
+                            Please do not reply to this email.
                         </p>
                     </div>
                 </div>

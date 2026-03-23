@@ -7,8 +7,10 @@ import { PendingUser } from "../models/PendingUser.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { cookieOptions } from "../config/cookieOptions.js";
+import { getCookieOptions } from "../config/cookieOptions.js";
 import { generateAccessToken, generateRefreshToken, generateSessionId } from "../utils/token.js";
+import mongoose from "mongoose";
+import { getTimeDifference } from "../utils/getTimeDifference.js";
 
 
 
@@ -18,11 +20,8 @@ import { generateAccessToken, generateRefreshToken, generateSessionId } from "..
 
 
 
-
-// 🔹 REGISTER CONTROLLER
 export const register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
-    console.log(`Register request for ${email}`);
 
     if (!name || !email || !password) {
         throw new ApiError(400, "All fields are required");
@@ -56,24 +55,25 @@ export const register = asyncHandler(async (req, res) => {
             email,
             password: hashedPassword,
             verificationToken: token,
-            verificationTokenExpiry: Date.now() + 1000 * 60 * 10 // 10 minutes
+            verificationTokenExpiry: Date.now() + 1000 * 60 * 10, // 10 minutes
         });
     }
 
-    console.log(`Pending user {${existingPending ? 'existing' : 'new'}} for ${email} with token ${token}`);
+    console.log(`${existingPending ? 'Existing' : 'New'} user ${existingPending ? 'updated' : 'created'} for ${email} | Token ${token} (duration: 10 mins)`);
 
     // 5. Send email
     const verifyLink = `${process.env.CLIENT_URL}/verify/${token}`;
 
     const emailHTML = registerEmail(verifyLink);
 
-    await sendEmail(
-        email,
-        "🎉 Welcome to QueueINDIA! Verify Your Email Address",
-        emailHTML,
-        true
-    );
-    console.log(`Verification email sent to ${email}`);
+    // await sendEmail(
+    //     email,
+    //     "🎉 Welcome to CollegeFinder! Verify Your Email Address",
+    //     emailHTML,
+    //     true
+    // );
+
+    console.log(`Verification email sent to ${email}`); // temporary log since email sending is disabled for testing
 
     return res.status(200).json(
         new ApiResponse(
@@ -96,20 +96,29 @@ export const register = asyncHandler(async (req, res) => {
 
 
 
-// 🔹 VERIFY CONTROLLER
 export const verify = asyncHandler(async (req, res) => {
     const { token } = req.params;
+    const { device = "Email Verification" } = req.body;
 
     const pending = await PendingUser.findOne({
         verificationToken: token,
-        verificationTokenExpiry: { $gt: Date.now() }
     });
 
+
     if (!pending) {
-        throw new ApiError(400, "Invalid or expired token");
+        throw new ApiError(400, "Invalid Token");
     }
 
-    // Prevent duplicate user (race condition safety)
+    if (pending.verificationTokenExpiry < Date.now()) {
+        const timeInfo = getTimeDifference(pending.verificationTokenExpiry);
+
+        throw new ApiError(
+            400,
+            `Token expired ${timeInfo} ago. Please register again.`
+        );
+    }
+
+    // Prevent duplicate user
     let user = await User.findOne({ email: pending.email });
 
     if (!user) {
@@ -118,22 +127,51 @@ export const verify = asyncHandler(async (req, res) => {
             email: pending.email,
             password: pending.password
         });
-    }
+    }   
+
+    // creating session for login after email verification
+    const sessionId = generateSessionId();
+    const refreshToken = generateRefreshToken(user._id, sessionId);
+    const accessToken = generateAccessToken(user);
+
+    user.sessions.push({
+        sessionId,
+        device: device,
+        refreshToken,
+        isActive: true
+    });
+
+    await user.save();
 
     // Delete pending user
     await PendingUser.deleteOne({ _id: pending._id });
 
-    // Redirect to frontend
+    const cookieOptions = getCookieOptions();
+
+    console.log(`User verified and logged in via email verification | Email: ${user.email}`);
+
+    // If Postman → return JSON
     if (req.headers["user-agent"]?.includes("Postman")) {
-        return res.status(200).json({
-            success: true,
-            message: "Email verified successfully"
-        });
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, cookieOptions)
+            .cookie("refreshToken", refreshToken, cookieOptions)
+            .json(
+                new ApiResponse(
+                    200,
+                    { accessToken },
+                    "[Postman] Login successfull"
+                )
+            );
     }
 
-    return res.redirect(
-        `${process.env.CLIENT_URL}/login?verified=true`
-    );
+    const redirectUrl = user.role === "admin" ? `${process.env.CLIENT_URL}/admin` : `${process.env.CLIENT_URL}/dashboard`;
+
+    // Redirect as logged-in user for normal browser requests
+    return res
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .redirect(redirectUrl);
 });
 
 
@@ -151,7 +189,7 @@ export const login = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
-        throw new ApiError(404, "User not found");
+        throw new ApiError(404, "User doesn't exist");
     }
 
     const isMatch = bcrypt.compare(password, user.password);
@@ -159,7 +197,7 @@ export const login = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid credentials");
     }
 
-    // 🔥 Create session
+    // Create session
     const sessionId = generateSessionId();
     const refreshToken = generateRefreshToken(user._id, sessionId);
     const accessToken = generateAccessToken(user);
@@ -174,6 +212,8 @@ export const login = asyncHandler(async (req, res) => {
     await user.save();
 
     const cookieOptions = getCookieOptions();
+
+    console.log(`User logged in | Email: ${user.email} | Device: ${device}`);
 
     return res
         .status(200)
@@ -205,7 +245,7 @@ export const logout = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (!user) {
-        throw new ApiError(404, "User not found");
+        throw new ApiError(404, "User doesn't exist");
     }
 
     // deactivate session
@@ -217,6 +257,8 @@ export const logout = asyncHandler(async (req, res) => {
     });
 
     await user.save();
+
+    console.log(`User logged out | Email: ${user.email}`);
 
     return res
         .clearCookie("accessToken")
@@ -238,6 +280,7 @@ export const logoutAll = asyncHandler(async (req, res) => {
 
     user.sessions.forEach((s) => (s.isActive = false));
     await user.save();
+    console.log(`User logged out from all devices | Email: ${user.email}`);
 
     return res
         .clearCookie("accessToken")
@@ -253,7 +296,10 @@ export const logoutAll = asyncHandler(async (req, res) => {
 
 
 export const refresh = asyncHandler(async (req, res) => {
-    const token = req.cookies?.refreshToken;
+    const token =
+        req.cookies?.refreshToken ||
+        req.header("Authorization")?.replace("Bearer ", "");
+        console.log("Refresh token received:", token); // Debug log
 
     if (!token) {
         throw new ApiError(401, "No refresh token provided");
@@ -282,12 +328,14 @@ export const refresh = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Invalid session");
     }
 
-    // 🔥 Update activity
+    // Update activity
     session.latestLogin = new Date();
     await user.save();
 
     const newAccessToken = generateAccessToken(user);
     const cookieOptions = getCookieOptions();
+
+    console.log(`Access token refreshed | Email: ${user.email} | Device: ${session.device}`);
 
     return res
         .cookie("accessToken", newAccessToken, cookieOptions)
