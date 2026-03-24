@@ -290,20 +290,57 @@ const logout = asyncHandler(async (req, res) => {
 
 
 const logoutAll = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id);
+    const userId = req.user?._id;
 
-    user.sessions.forEach((s) => (
-        s.isActive = false,
-        s.refreshToken = null // Invalidate all refresh tokens
-    ));
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const currentToken = req.cookies?.refreshToken;
+    console.log(`Logout all initiated | User ID: ${userId} | Current Token: ${currentToken}`);
+
+    if (!currentToken) {
+        throw new ApiError(400, "No active session found");
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    let currentSessionFound = false;
+
+    user.sessions = user.sessions.map((session) => {
+        // 🔥 Keep current session
+        if (session.refreshToken === currentToken) {
+            currentSessionFound = true;
+            return session;
+        }
+
+        // ❌ Kill all other sessions
+        return {
+            ...session.toObject(),
+            isActive: false,
+            refreshToken: null,
+        };
+    });
+
+    if (!currentSessionFound) {
+        throw new ApiError(401, "Current session invalid or expired");
+    }
 
     await user.save();
-    console.log(`User logged out from all devices | Email: ${user.email}`);
 
-    return res
-        .clearCookie("accessToken")
-        .clearCookie("refreshToken")
-        .json(new ApiResponse(200, null, "Logged out from all devices"));
+    console.log(`User logged out from all other devices | Email: ${user.email}`);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            null,
+            "Logged out from all devices"
+        )
+    );
 });
 
 

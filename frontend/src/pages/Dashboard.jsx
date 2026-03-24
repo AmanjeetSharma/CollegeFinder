@@ -1,46 +1,73 @@
 // pages/Dashboard.jsx
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useUser } from "../context/UserContext";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Globe, Smartphone, Monitor, Loader2, User, Shield, Mail, MapPin, Calendar } from "lucide-react";
+import {
+    TrendingUp,
+    BookOpen,
+    Award,
+    Calendar,
+    Clock,
+    ChevronRight,
+    Sparkles,
+    Target,
+    GraduationCap,
+    Briefcase,
+    Trophy,
+    ArrowRight,
+    Brain,
+    CheckCircle2,
+    AlertCircle
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-export default function Dashboard() {
-    const { user, logout, logoutAll } = useAuth();
-    const { 
-        updateProfile, 
-        updatingProfile, 
-        sessions, 
-        loadingSessions, 
-        getUserSessions, 
-        logoutSession 
-    } = useUser();
+const Dashboard = () => {
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
-    
-    const [profileForm, setProfileForm] = useState({
-        name: user?.name || "",
-        address: {
-            city: user?.address?.city || "",
-            state: user?.address?.state || "",
-            country: user?.address?.country || "",
-            zipCode: user?.address?.zipCode || ""
-        }
+
+    // Mock data for dashboard
+    const [progressData, setProgressData] = useState({
+        completedTests: 3,
+        totalTests: 5,
+        recommendedCourses: 4,
+        upcomingDeadlines: 2,
+        aptitudeScore: 85,
+        careerMatches: 3
     });
 
-    useEffect(() => {
-        loadSessions();
-    }, []);
+    const [recentActivities, setRecentActivities] = useState([
+        { id: 1, title: "Completed Aptitude Test", date: "2024-03-20", type: "test", score: "85%" },
+        { id: 2, title: "New Career Recommendation", date: "2024-03-19", type: "career", match: "Data Science" },
+        { id: 3, title: "Scholarship Deadline", date: "2024-03-25", type: "deadline", name: "National Merit Scholarship" },
+        { id: 4, title: "Course Progress", date: "2024-03-18", type: "course", progress: "60%" }
+    ]);
 
-    const loadSessions = async () => {
-        await getUserSessions();
+    const [aptitudeData, setAptitudeData] = useState([
+        { subject: "Mathematics", score: 85 },
+        { subject: "Science", score: 78 },
+        { subject: "English", score: 92 },
+        { subject: "Logical Reasoning", score: 70 },
+        { subject: "General Knowledge", score: 88 }
+    ]);
+
+    const careerPaths = [
+        { name: "Data Science", match: 92, color: "#3B82F6", requirements: ["Mathematics", "Programming"] },
+        { name: "Engineering", match: 88, color: "#10B981", requirements: ["Physics", "Mathematics"] },
+        { name: "Medicine", match: 76, color: "#F59E0B", requirements: ["Biology", "Chemistry"] }
+    ];
+
+    const upcomingEvents = [
+        { name: "JEE Main 2024", date: "2024-04-15", type: "exam" },
+        { name: "NEET 2024", date: "2024-05-05", type: "exam" },
+        { name: "Scholarship Application", date: "2024-03-30", type: "scholarship" }
+    ];
+
+    const getInitials = (name) => {
+        return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
     };
 
     const handleLogout = async () => {
@@ -48,303 +75,274 @@ export default function Dashboard() {
         navigate("/login");
     };
 
-    const handleLogoutAll = async () => {
-        await logoutAll();
-        navigate("/login");
-    };
-
-    const handleUpdateProfile = async (e) => {
-        e.preventDefault();
-        try {
-            await updateProfile(profileForm);
-        } catch (error) {
-            console.error("Failed to update profile");
+    const getActivityIcon = (type) => {
+        switch (type) {
+            case 'test': return <Brain className="h-4 w-4 text-blue-500" />;
+            case 'career': return <Briefcase className="h-4 w-4 text-green-500" />;
+            case 'deadline': return <Calendar className="h-4 w-4 text-red-500" />;
+            case 'course': return <BookOpen className="h-4 w-4 text-purple-500" />;
+            default: return <Sparkles className="h-4 w-4 text-gray-500" />;
         }
     };
 
-    const handleSessionLogout = async (sessionToken) => {
-        await logoutSession(sessionToken);
-    };
-
-    const getDeviceIcon = (device) => {
-        switch (device?.toLowerCase()) {
-            case 'web':
-                return <Monitor className="h-4 w-4" />;
-            case 'mobile':
-                return <Smartphone className="h-4 w-4" />;
-            default:
-                return <Globe className="h-4 w-4" />;
-        }
-    };
-
-    const getDeviceBadge = (device) => {
-        switch (device?.toLowerCase()) {
-            case 'web':
-                return <Badge variant="secondary" className="bg-gray-100 text-gray-700">Desktop</Badge>;
-            case 'mobile':
-                return <Badge variant="secondary" className="bg-gray-100 text-gray-700">Mobile</Badge>;
-            default:
-                return <Badge variant="secondary" className="bg-gray-100 text-gray-700">Unknown</Badge>;
-        }
-    };
-
-    const getInitials = (name) => {
-        return name
-            ?.split(' ')
-            .map(n => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2) || 'U';
-    };
-
-    const formatDate = (date) => {
-        if (!date) return "Unknown";
-        return new Date(date).toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+    const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
     return (
-        <div className="min-h-screen bg-gray-50/50 py-8">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header Section */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-                            <p className="text-sm text-gray-500 mt-1">Manage your account settings and preferences</p>
-                        </div>
-                        <Button 
-                            variant="outline" 
-                            onClick={handleLogout}
-                            className="text-gray-600 hover:text-gray-700"
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Header Section with Animation */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8"
+                >
+                    <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                            Welcome back, {user?.name?.split(' ')[0]}! 👋
+                        </h1>
+                        <p className="text-gray-500 mt-1">Your personalized career guidance dashboard</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate('/profile')}
+                            className="border-gray-400 hover:bg-gray-200 cursor-pointer hover:bg-gray-900 hover:text-white"
                         >
-                            <LogOut className="h-4 w-4 mr-2" />
-                            Sign Out
+                            <GraduationCap className="h-4 w-4 mr-2" />
+                            View Profile
                         </Button>
                     </div>
-                </div>
+                </motion.div>
 
-                {/* Welcome Card */}
-                <Card className="mb-8 border-0 shadow-sm">
-                    <CardContent className="p-6">
-                        <div className="flex items-center space-x-4">
-                            <Avatar className="h-16 w-16">
-                                <AvatarFallback className="bg-gray-100 text-gray-600 text-xl">
-                                    {getInitials(user?.name)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <h2 className="text-xl font-medium text-gray-900">Welcome back, {user?.name?.split(' ')[0]}!</h2>
-                                <p className="text-sm text-gray-500 mt-1">We're glad to see you again</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Tabs */}
-                <Tabs defaultValue="profile" className="space-y-6">
-                    <TabsList className="bg-transparent border-b rounded-none p-0 space-x-8">
-                        <TabsTrigger 
-                            value="profile" 
-                            className="data-[state=active]:border-b-2 data-[state=active]:border-gray-800 data-[state=active]:text-gray-900 rounded-none px-0 pb-2 text-gray-500"
+                {/* Stats Grid */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                >
+                    {[
+                        { icon: Brain, label: "Aptitude Score", value: `${progressData.aptitudeScore}%`, color: "from-blue-500 to-blue-600", trend: "+5%" },
+                        { icon: Target, label: "Career Matches", value: progressData.careerMatches, color: "from-green-500 to-green-600", trend: "+2" },
+                        { icon: BookOpen, label: "Courses Completed", value: `${progressData.completedTests}/${progressData.totalTests}`, color: "from-purple-500 to-purple-600", trend: "2 left" },
+                        { icon: Award, label: "Recommendations", value: progressData.recommendedCourses, color: "from-orange-500 to-orange-600", trend: "new" }
+                    ].map((stat, index) => (
+                        <motion.div
+                            key={index}
+                            whileHover={{ scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300 }}
                         >
-                            <User className="h-4 w-4 mr-2" />
-                            Profile
-                        </TabsTrigger>
-                        <TabsTrigger 
-                            value="sessions" 
-                            className="data-[state=active]:border-b-2 data-[state=active]:border-gray-800 data-[state=active]:text-gray-900 rounded-none px-0 pb-2 text-gray-500"
-                        >
-                            <Shield className="h-4 w-4 mr-2" />
-                            Active Sessions
-                        </TabsTrigger>
-                    </TabsList>
-
-                    {/* Profile Tab */}
-                    <TabsContent value="profile">
-                        <Card className="border-0 shadow-sm">
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-lg font-medium">Profile Information</CardTitle>
-                                <CardDescription className="text-sm text-gray-500">
-                                    Update your personal details
-                                </CardDescription>
-                            </CardHeader>
-                            <Separator />
-                            <form onSubmit={handleUpdateProfile}>
-                                <CardContent className="space-y-6 pt-6">
-                                    {/* Name Field */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</Label>
-                                        <Input
-                                            id="name"
-                                            value={profileForm.name}
-                                            onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                                            className="border-gray-200 focus:border-gray-400"
-                                            placeholder="Enter your full name"
-                                        />
-                                    </div>
-
-                                    {/* Email Field */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</Label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                            <Input
-                                                id="email"
-                                                value={user?.email}
-                                                disabled
-                                                className="pl-9 bg-gray-50 border-gray-200 text-gray-500"
-                                            />
+                            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color} bg-opacity-10`}>
+                                            <stat.icon className="h-6 w-6 text-white" />
                                         </div>
-                                        <p className="text-xs text-gray-400">Email address cannot be changed</p>
+                                        <Badge variant="secondary" className="bg-green-100 text-green-700">
+                                            {stat.trend}
+                                        </Badge>
                                     </div>
-
-                                    {/* Address Section */}
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-medium text-gray-700">Address Information</Label>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="relative">
-                                                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                <Input
-                                                    placeholder="City"
-                                                    value={profileForm.address.city}
-                                                    onChange={(e) => setProfileForm({
-                                                        ...profileForm,
-                                                        address: { ...profileForm.address, city: e.target.value }
-                                                    })}
-                                                    className="pl-9 border-gray-200"
-                                                />
-                                            </div>
-                                            <Input
-                                                placeholder="State"
-                                                value={profileForm.address.state}
-                                                onChange={(e) => setProfileForm({
-                                                    ...profileForm,
-                                                    address: { ...profileForm.address, state: e.target.value }
-                                                })}
-                                                className="border-gray-200"
-                                            />
-                                            <Input
-                                                placeholder="Country"
-                                                value={profileForm.address.country}
-                                                onChange={(e) => setProfileForm({
-                                                    ...profileForm,
-                                                    address: { ...profileForm.address, country: e.target.value }
-                                                })}
-                                                className="border-gray-200"
-                                            />
-                                            <Input
-                                                placeholder="Zip Code"
-                                                value={profileForm.address.zipCode}
-                                                onChange={(e) => setProfileForm({
-                                                    ...profileForm,
-                                                    address: { ...profileForm.address, zipCode: e.target.value }
-                                                })}
-                                                className="border-gray-200"
-                                            />
-                                        </div>
-                                    </div>
+                                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                                    <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
                                 </CardContent>
-                                <Separator />
-                                <CardFooter className="pt-6">
-                                    <Button 
-                                        type="submit" 
-                                        disabled={updatingProfile}
-                                        className="bg-gray-900 hover:bg-gray-800 text-white"
-                                    >
-                                        {updatingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        {updatingProfile ? "Saving..." : "Save Changes"}
-                                    </Button>
-                                </CardFooter>
-                            </form>
-                        </Card>
-                    </TabsContent>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </motion.div>
 
-                    {/* Sessions Tab */}
-                    <TabsContent value="sessions">
-                        <Card className="border-0 shadow-sm">
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-lg font-medium">Active Sessions</CardTitle>
-                                <CardDescription className="text-sm text-gray-500">
-                                    Devices and browsers where you're currently logged in
-                                </CardDescription>
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Aptitude Progress Chart */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="lg:col-span-2"
+                    >
+                        <Card className="border-0 shadow-lg">
+                            <CardHeader>
+                                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                                    Aptitude Analysis
+                                </CardTitle>
+                                <CardDescription>Your performance across different subjects</CardDescription>
                             </CardHeader>
-                            <Separator />
-                            <CardContent className="pt-6">
-                                {loadingSessions ? (
-                                    <div className="flex justify-center py-12">
-                                        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {sessions.length > 0 ? (
-                                            sessions.map((session, index) => (
-                                                <div 
-                                                    key={index} 
-                                                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                                                >
-                                                    <div className="flex items-center space-x-4">
-                                                        <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                            {getDeviceIcon(session.device)}
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center space-x-2 mb-1">
-                                                                <p className="text-sm font-medium text-gray-900 capitalize">
-                                                                    {session.device || "Unknown Device"}
-                                                                </p>
-                                                                {getDeviceBadge(session.device)}
-                                                            </div>
-                                                            <div className="flex items-center space-x-4 text-xs text-gray-500">
-                                                                <div className="flex items-center">
-                                                                    <Calendar className="h-3 w-3 mr-1" />
-                                                                    <span>{formatDate(session.createdAt)}</span>
-                                                                </div>
-                                                                {session.ip && (
-                                                                    <span>IP: {session.ip}</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleSessionLogout(session.token || session.sessionId)}
-                                                        className="text-gray-500 hover:text-red-600 hover:bg-red-50"
-                                                    >
-                                                        <LogOut className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="text-center py-12">
-                                                <Shield className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                                                <p className="text-sm text-gray-500">No active sessions found</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                {sessions.length > 0 && (
-                                    <div className="mt-6 pt-4 border-t">
-                                        <Button 
-                                            variant="outline" 
-                                            onClick={handleLogoutAll} 
-                                            className="w-full border-gray-200 text-gray-600 hover:bg-gray-50"
-                                        >
-                                            <LogOut className="h-4 w-4 mr-2" />
-                                            Logout from all devices
-                                        </Button>
-                                    </div>
-                                )}
+                            <CardContent>
+                                <div className="h-80">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <LineChart data={aptitudeData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                            <XAxis dataKey="subject" stroke="#6B7280" />
+                                            <YAxis stroke="#6B7280" />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                                }}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="score"
+                                                stroke="#3B82F6"
+                                                strokeWidth={2}
+                                                dot={{ fill: '#3B82F6', strokeWidth: 2 }}
+                                                activeDot={{ r: 8 }}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </CardContent>
                         </Card>
-                    </TabsContent>
-                </Tabs>
+                    </motion.div>
+
+                    {/* Career Recommendations */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <Card className="border-0 shadow-lg h-full">
+                            <CardHeader>
+                                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                    <Sparkles className="h-5 w-5 text-purple-500" />
+                                    AI Career Matches
+                                </CardTitle>
+                                <CardDescription>Based on your aptitude and interests</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {careerPaths.map((career, index) => (
+                                    <motion.div
+                                        key={index}
+                                        whileHover={{ scale: 1.02 }}
+                                        className="p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl cursor-pointer hover:shadow-md transition-all"
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h3 className="font-semibold text-gray-900">{career.name}</h3>
+                                            <Badge style={{ backgroundColor: career.color }} className="text-white">
+                                                {career.match}% Match
+                                            </Badge>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${career.match}%` }}
+                                                transition={{ duration: 1, delay: 0.5 }}
+                                                className="h-2 rounded-full"
+                                                style={{ backgroundColor: career.color }}
+                                            />
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {career.requirements.map((req, idx) => (
+                                                <Badge key={idx} variant="outline" className="text-xs">
+                                                    {req}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                                <Button
+                                    variant="ghost"
+                                    className="w-full mt-4 text-blue-600 hover:text-blue-700"
+                                    onClick={() => navigate('/career-guidance')}
+                                >
+                                    View All Recommendations
+                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
+                    {/* Recent Activity */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="lg:col-span-2"
+                    >
+                        <Card className="border-0 shadow-lg">
+                            <CardHeader>
+                                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                    <Clock className="h-5 w-5 text-gray-500" />
+                                    Recent Activity
+                                </CardTitle>
+                                <CardDescription>Your latest achievements and updates</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {recentActivities.map((activity, index) => (
+                                        <motion.div
+                                            key={activity.id}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.4 + index * 0.1 }}
+                                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                    {getActivityIcon(activity.type)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">{activity.title}</p>
+                                                    <p className="text-sm text-gray-500">{activity.date}</p>
+                                                </div>
+                                            </div>
+                                            <ChevronRight className="h-5 w-5 text-gray-400" />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
+                    {/* Upcoming Events */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        <Card className="border-0 shadow-lg">
+                            <CardHeader>
+                                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                                    <Calendar className="h-5 w-5 text-orange-500" />
+                                    Upcoming Deadlines
+                                </CardTitle>
+                                <CardDescription>Important dates and events</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-3">
+                                    {upcomingEvents.map((event, index) => (
+                                        <motion.div
+                                            key={index}
+                                            whileHover={{ x: 5 }}
+                                            className="p-3 border border-gray-100 rounded-lg"
+                                        >
+                                            <div className="flex items-center justify-between mb-1">
+                                                <p className="font-medium text-gray-900">{event.name}</p>
+                                                <Badge variant="outline" className="text-xs">
+                                                    {event.type}
+                                                </Badge>
+                                            </div>
+                                            <p className="text-sm text-gray-500">{event.date}</p>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    className="w-full mt-4"
+                                    onClick={() => navigate('/calendar')}
+                                >
+                                    View Full Calendar
+                                    <Calendar className="h-4 w-4 ml-2" />
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );
-}
+};
+
+export default Dashboard;

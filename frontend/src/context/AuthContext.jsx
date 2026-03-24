@@ -155,14 +155,19 @@ export const AuthProvider = ({ children }) => {
     // ================================
     const logoutAll = async () => {
         try {
-            await axiosInstance.post("/auth/logout-all");
+            const { data } = await axiosInstance.post("/auth/logout-all");
 
-            toast.success("Logged out from all devices");
+            toast.success(
+                data?.message || "Logged out from all other devices"
+            );
+
         } catch (err) {
-            toast.error("Failed to logout from all devices");
-        } finally {
-            setUser(null);
-            localStorage.removeItem("backendReady");
+            const msg =
+                err?.response?.data?.message ||
+                "Failed to logout from other devices";
+
+            toast.error(msg);
+            throw err; // important if caller needs it
         }
     };
 

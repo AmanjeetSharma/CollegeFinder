@@ -12,6 +12,8 @@ const Login = lazy(() => import("../components/forms/Login"));
 const Register = lazy(() => import("../components/forms/Register"));
 const Verify = lazy(() => import("../components/forms/Verify"));
 const NotFound = lazy(() => import("../pages/NotFound"));
+const Profile = lazy(() => import("../pages/Profile"));
+const Sessions = lazy(() => import("../pages/Sessions"));
 
 const AppRoutes = () => {
     return (
@@ -28,6 +30,9 @@ const AppRoutes = () => {
 
                 {/* Protected routes */}
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
+
 
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />

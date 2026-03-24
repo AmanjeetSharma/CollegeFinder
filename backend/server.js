@@ -29,3 +29,7 @@ connectDB()
     .catch((error) => {
         console.log("MongoDB Connection failed: ", error);
     });
+
+
+
+    // About the website: This project, titled “One-Stop Personalized Career & Education Advisor,” is designed as an online learning and guidance platform specifically for Class 10 and Class 12 students. Its main goal is to help students make informed decisions about their future by offering personalized academic and career guidance. Through features like aptitude-based tests and AI-driven recommendations, the platform suggests suitable subject streams, higher education options, and career paths tailored to each student’s abilities and interests. It also provides reliable information about government colleges, entrance exam eligibility, and scholarship opportunities, all in one place. In addition, the system includes tools such as verified user access through SMS authentication, real-time updates on results and admissions, and progress tracking with reminders. By combining modern web and mobile technologies with intelligent analysis, the platform aims to reduce confusion, improve decision-making, and ultimately lower dropout rates among students while promoting equal access to quality education.
