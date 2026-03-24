@@ -182,13 +182,30 @@ const Profile = () => {
                 </motion.div>
 
                 {/* Main Profile Content */}
-                <Tabs defaultValue="personal" className="space-y-6">
-                    <TabsList className="bg-white border shadow-sm">
-                        <TabsTrigger value="personal">Personal Info</TabsTrigger>
-                        <TabsTrigger value="education">Education</TabsTrigger>
-                        <TabsTrigger value="interests">Interests & Skills</TabsTrigger>
+                <Tabs defaultValue="personal" className="space-y-5">
+                    <TabsList className="bg-transparent border-0 p-0 gap-3 w-full sm:w-auto">
+                        <TabsTrigger
+                            value="personal"
+                            className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-gray-100 rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 data-[state=active]:text-gray-900 hover:bg-white/50 hover:shadow-md transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                        >
+                            <User className="h-4 w-4" />
+                            Personal Info
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="education"
+                            className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-gray-100 rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 data-[state=active]:text-gray-900 hover:bg-white/50 hover:shadow-md transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                        >
+                            <GraduationCap className="h-4 w-4" />
+                            Education
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="interests"
+                            className="data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:border data-[state=active]:border-gray-100 rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 data-[state=active]:text-gray-900 hover:bg-white/50 hover:shadow-md transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                        >
+                            <Heart className="h-4 w-4" />
+                            Interests & Skills
+                        </TabsTrigger>
                     </TabsList>
-
                     {/* Personal Info Tab */}
                     <TabsContent value="personal">
                         <motion.div

@@ -6,14 +6,25 @@ import PublicRoute from "./PublicRoute";
 import PageLoader from "../utils/PageLoader";
 
 // Lazy load components
+
+//info pages/general pages
 const Home = lazy(() => import("../pages/Home"));
-const Dashboard = lazy(() => import("../pages/Dashboard"));
-const Login = lazy(() => import("../components/forms/Login"));
+const NotFound = lazy(() => import("../pages/NotFound"));
+const About = lazy(() => import("../pages/About"));
+const Contact = lazy(() => import("../pages/Contact"));
+const HowItWorks = lazy(() => import("../pages/HowItWorks"));
+
+
+//auth related pages
 const Register = lazy(() => import("../components/forms/Register"));
 const Verify = lazy(() => import("../components/forms/Verify"));
-const NotFound = lazy(() => import("../pages/NotFound"));
+const Login = lazy(() => import("../components/forms/Login"));
+
+//user related pages
+const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Profile = lazy(() => import("../pages/Profile"));
 const Sessions = lazy(() => import("../pages/Sessions"));
+const FindCollege = lazy(() => import("../pages/FindCollege"));
 
 const AppRoutes = () => {
     return (
@@ -28,10 +39,16 @@ const AppRoutes = () => {
                 {/* Public route */}
                 <Route path="/" element={<Home />} />
 
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/colleges" element={<FindCollege />} />
+
                 {/* Protected routes */}
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
+
 
 
                 {/* Catch-all route for 404 */}

@@ -104,7 +104,10 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({ email });
 
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
     if (!user) {
+        await delay(2300); // 2 second delay to mitigate user enumeration attacks
         return res.status(200).json(
             new ApiResponse(200, null, "If this email exists, a reset link has been sent")
         );

@@ -1,23 +1,19 @@
-// pages/Register.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 
 export default function Register() {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
-        password: "",
-        confirmPassword: ""
+        password: ""
     });
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [passwordStrength, setPasswordStrength] = useState({
@@ -39,12 +35,15 @@ export default function Register() {
         if (password.length >= 8) score++;
         if (password.length >= 12) score++;
         if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
         if (/[0-9]/.test(password)) score++;
         if (/[^A-Za-z0-9]/.test(password)) score++;
 
-        if (score <= 2) message = "Weak password";
-        else if (score <= 4) message = "Medium password";
-        else message = "Strong password";
+        if (score <= 2) message = "Very Weak";
+        else if (score <= 3) message = "Weak";
+        else if (score <= 4) message = "Medium";
+        else if (score <= 5) message = "Strong";
+        else message = "Very Strong";
 
         return { score, message };
     };
@@ -68,24 +67,6 @@ export default function Register() {
         if (name === "password") {
             setPasswordStrength(checkPasswordStrength(value));
         }
-
-        // Check confirm password match in real-time
-        if (name === "confirmPassword" || (name === "password" && formData.confirmPassword)) {
-            const confirmValue = name === "confirmPassword" ? value : formData.confirmPassword;
-            const passwordValue = name === "password" ? value : formData.password;
-            
-            if (confirmValue && passwordValue !== confirmValue) {
-                setErrors(prev => ({
-                    ...prev,
-                    confirmPassword: "Passwords do not match"
-                }));
-            } else {
-                setErrors(prev => ({
-                    ...prev,
-                    confirmPassword: ""
-                }));
-            }
-        }
     };
 
     const validateForm = () => {
@@ -108,22 +89,19 @@ export default function Register() {
             newErrors.email = "Please enter a valid email address";
         }
 
-        // Password validation
+        // Password validation - Updated requirements
         if (!formData.password) {
             newErrors.password = "Password is required";
-        } else if (formData.password.length < 6) {
-            newErrors.password = "Password must be at least 6 characters";
+        } else if (formData.password.length < 8) {
+            newErrors.password = "Password must be at least 8 characters";
         } else if (!/[A-Z]/.test(formData.password)) {
             newErrors.password = "Password must contain at least one uppercase letter";
+        } else if (!/[a-z]/.test(formData.password)) {
+            newErrors.password = "Password must contain at least one lowercase letter";
         } else if (!/[0-9]/.test(formData.password)) {
             newErrors.password = "Password must contain at least one number";
-        }
-
-        // Confirm password validation
-        if (!formData.confirmPassword) {
-            newErrors.confirmPassword = "Please confirm your password";
-        } else if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = "Passwords do not match";
+        } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
+            newErrors.password = "Password must contain at least one special character (e.g., !@#$%^&*)";
         }
 
         setErrors(newErrors);
@@ -160,218 +138,202 @@ export default function Register() {
     // Get password strength color
     const getPasswordStrengthColor = () => {
         if (passwordStrength.score <= 2) return "bg-red-500";
+        if (passwordStrength.score <= 3) return "bg-orange-500";
         if (passwordStrength.score <= 4) return "bg-yellow-500";
+        if (passwordStrength.score <= 5) return "bg-blue-500";
         return "bg-green-500";
     };
 
     // Get password strength width
     const getPasswordStrengthWidth = () => {
         if (!formData.password) return "0%";
-        const percentage = (passwordStrength.score / 5) * 100;
+        const percentage = (passwordStrength.score / 6) * 100;
         return `${percentage}%`;
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-            <Card className="w-full max-w-md shadow-xl">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl text-center">Create an Account</CardTitle>
-                    <CardDescription className="text-center">
-                        Enter your details to create your account
-                    </CardDescription>
-                </CardHeader>
-                
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="space-y-4">
-                        {/* Name Field */}
-                        <div className="space-y-2">
-                            <Label htmlFor="name">
-                                Full Name <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                type="text"
-                                placeholder="John Doe"
-                                value={formData.name}
-                                onChange={handleChange}
-                                className={errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}
-                                disabled={loading}
-                                autoComplete="name"
-                            />
-                            {errors.name && (
-                                <p className="text-sm text-red-500 flex items-center gap-1">
-                                    <XCircle className="h-3 w-3" />
-                                    {errors.name}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Email Field */}
-                        <div className="space-y-2">
-                            <Label htmlFor="email">
-                                Email Address <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="john@example.com"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
-                                disabled={loading}
-                                autoComplete="email"
-                            />
-                            {errors.email && (
-                                <p className="text-sm text-red-500 flex items-center gap-1">
-                                    <XCircle className="h-3 w-3" />
-                                    {errors.email}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Password Field */}
-                        <div className="space-y-2">
-                            <Label htmlFor="password">
-                                Password <span className="text-red-500">*</span>
-                            </Label>
-                            <div className="relative">
+        <div className="min-h-screen flex flex-col items-center justify-between p-4 bg-slate-50">
+            <div className="w-full max-w-md flex-1 flex items-center">
+                <Card className="border shadow-lg w-full">
+                    <CardHeader className="text-center space-y-2 pt-8 pb-4">
+                        <CardTitle className="text-3xl font-bold">Create an Account</CardTitle>
+                        <CardDescription className="text-muted-foreground">
+                            Enter your details to create your account
+                        </CardDescription>
+                    </CardHeader>
+                    
+                    <form onSubmit={handleSubmit}>
+                        <CardContent className="space-y-5 px-6 pb-2">
+                            {/* Name Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="name">
+                                    Full Name <span className="text-destructive">*</span>
+                                </Label>
                                 <Input
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter your password"
-                                    value={formData.password}
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    placeholder="Enter full name"
+                                    value={formData.name}
                                     onChange={handleChange}
-                                    className={errors.password ? "border-red-500 focus-visible:ring-red-500 pr-10" : "pr-10"}
+                                    className={errors.name ? "border-destructive focus-visible:ring-destructive" : ""}
                                     disabled={loading}
-                                    autoComplete="new-password"
+                                    autoComplete="name"
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                >
-                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
+                                {errors.name && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <XCircle className="h-3 w-3" />
+                                        {errors.name}
+                                    </p>
+                                )}
                             </div>
-                            
-                            {/* Password Requirements */}
-                            {formData.password && (
-                                <div className="space-y-2 mt-2">
-                                    <div className="flex justify-between items-center text-xs">
-                                        <span className="text-muted-foreground">Password strength:</span>
-                                        <span className={`font-medium ${
-                                            passwordStrength.score <= 2 ? "text-red-500" :
-                                            passwordStrength.score <= 4 ? "text-yellow-500" :
-                                            "text-green-500"
-                                        }`}>
-                                            {passwordStrength.message}
-                                        </span>
-                                    </div>
-                                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                        <div 
-                                            className={`h-full transition-all duration-300 ${getPasswordStrengthColor()}`}
-                                            style={{ width: getPasswordStrengthWidth() }}
-                                        />
-                                    </div>
-                                    <ul className="text-xs space-y-1 mt-2">
-                                        <li className={`flex items-center gap-1 ${formData.password.length >= 6 ? "text-green-500" : "text-gray-400"}`}>
-                                            {formData.password.length >= 6 ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                                            <span>At least 6 characters</span>
-                                        </li>
-                                        <li className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? "text-green-500" : "text-gray-400"}`}>
-                                            {/[A-Z]/.test(formData.password) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                                            <span>At least one uppercase letter</span>
-                                        </li>
-                                        <li className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? "text-green-500" : "text-gray-400"}`}>
-                                            {/[0-9]/.test(formData.password) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                                            <span>At least one number</span>
-                                        </li>
-                                    </ul>
+
+                            {/* Email Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="email">
+                                    Email Address <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
+                                    disabled={loading}
+                                    autoComplete="email"
+                                />
+                                {errors.email && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <XCircle className="h-3 w-3" />
+                                        {errors.email}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Password Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="password">
+                                    Password <span className="text-destructive">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Enter your password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className={errors.password ? "border-destructive focus-visible:ring-destructive pr-10" : "pr-10"}
+                                        disabled={loading}
+                                        autoComplete="new-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    >
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
                                 </div>
-                            )}
-                            {errors.password && (
-                                <p className="text-sm text-red-500 flex items-center gap-1">
-                                    <XCircle className="h-3 w-3" />
-                                    {errors.password}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Confirm Password Field */}
-                        <div className="space-y-2">
-                            <Label htmlFor="confirmPassword">
-                                Confirm Password <span className="text-red-500">*</span>
-                            </Label>
-                            <div className="relative">
-                                <Input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    placeholder="Confirm your password"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    className={errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500 pr-10" : "pr-10"}
-                                    disabled={loading}
-                                    autoComplete="new-password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                >
-                                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
+                                
+                                {/* Password Requirements */}
+                                {formData.password && (
+                                    <div className="space-y-2 mt-2">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-muted-foreground">Password strength:</span>
+                                            <span className={`font-medium ${
+                                                passwordStrength.score <= 2 ? "text-red-500" :
+                                                passwordStrength.score <= 3 ? "text-orange-500" :
+                                                passwordStrength.score <= 4 ? "text-yellow-500" :
+                                                passwordStrength.score <= 5 ? "text-blue-500" :
+                                                "text-green-500"
+                                            }`}>
+                                                {passwordStrength.message}
+                                            </span>
+                                        </div>
+                                        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                                            <div 
+                                                className={`h-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                                                style={{ width: getPasswordStrengthWidth() }}
+                                            />
+                                        </div>
+                                        <ul className="text-xs space-y-1 mt-2">
+                                            <li className={`flex items-center gap-1 ${formData.password.length >= 8 ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {formData.password.length >= 8 ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least 8 characters</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[A-Z]/.test(formData.password) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one uppercase letter</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[a-z]/.test(formData.password) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[a-z]/.test(formData.password) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one lowercase letter</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[0-9]/.test(formData.password) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one number</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(formData.password) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[^A-Za-z0-9]/.test(formData.password) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one special character (e.g., !@#$%^&*)</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                )}
+                                {errors.password && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <XCircle className="h-3 w-3" />
+                                        {errors.password}
+                                    </p>
+                                )}
                             </div>
-                            {errors.confirmPassword && (
-                                <p className="text-sm text-red-500 flex items-center gap-1">
-                                    <XCircle className="h-3 w-3" />
-                                    {errors.confirmPassword}
-                                </p>
-                            )}
+                        </CardContent>
+
+                        <div className="px-6 pb-8 pt-4">
+                            <Button 
+                                type="submit" 
+                                className="w-full" 
+                                disabled={loading}
+                            >
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {loading ? "Creating account..." : "Create Account"}
+                            </Button>
+                            
+                            <div className="text-center text-sm mt-6">
+                                <span className="text-muted-foreground">Already have an account? </span>
+                                <Link to="/login" className="text-primary font-semibold hover:underline">
+                                    Sign in
+                                </Link>
+                            </div>
                         </div>
+                    </form>
+                </Card>
+            </div>
 
-                        {/* Password Match Success Indicator */}
-                        {formData.confirmPassword && !errors.confirmPassword && formData.password === formData.confirmPassword && (
-                            <Alert className="bg-green-50 border-green-200">
-                                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                <AlertDescription className="text-green-700 text-sm">
-                                    Passwords match!
-                                </AlertDescription>
-                            </Alert>
-                        )}
-
-                        {/* Info Alert */}
-                        <Alert className="bg-blue-50 border-blue-200">
-                            <AlertDescription className="text-blue-700 text-xs">
-                                By creating an account, you agree to our Terms of Service and Privacy Policy.
-                                A verification link will be sent to your email address.
-                            </AlertDescription>
-                        </Alert>
-                    </CardContent>
-
-                    <CardFooter className="flex flex-col space-y-4">
-                        <Button 
-                            type="submit" 
-                            className="w-full" 
-                            disabled={loading}
-                            size="lg"
-                        >
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {loading ? "Creating account..." : "Create Account"}
-                        </Button>
-                        
-                        <div className="text-center text-sm">
-                            <span className="text-muted-foreground">Already have an account? </span>
-                            <Link to="/login" className="text-primary hover:underline font-medium">
-                                Sign in
-                            </Link>
-                        </div>
-                    </CardFooter>
-                </form>
-            </Card>
+            {/* Footer */}
+            <footer className="w-full py-6 text-center border-t mt-8">
+                <div className="container mx-auto px-4">
+                    <p className="text-sm text-muted-foreground">
+                        &copy; {new Date().getFullYear()} Your Company Name. All rights reserved.
+                    </p>
+                    <div className="flex justify-center gap-4 mt-2">
+                        <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                            Terms of Service
+                        </Link>
+                        <span className="text-muted-foreground text-xs">•</span>
+                        <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                            Privacy Policy
+                        </Link>
+                        <span className="text-muted-foreground text-xs">•</span>
+                        <Link to="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                            Contact Us
+                        </Link>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }

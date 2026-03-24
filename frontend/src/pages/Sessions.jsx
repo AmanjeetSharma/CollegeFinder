@@ -1,4 +1,4 @@
-// pages/Sessions.jsx (Fully Updated)
+// pages/Sessions.jsx (Updated with AlertDialog)
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "../context/UserContext";
@@ -7,6 +7,16 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "react-hot-toast";
 import {
     Monitor,
@@ -28,7 +38,6 @@ import {
     RefreshCw
 } from "lucide-react";
 import { formatDistanceToNow, isValid, parseISO } from "date-fns";
-import LogoutAllPopup from "@/components/ui/LogoutAllPopup";
 
 const Sessions = () => {
     const { sessions, loadingSessions, getUserSessions, logoutSession } = useUser();
@@ -36,7 +45,7 @@ const Sessions = () => {
     const navigate = useNavigate();
     const [currentSession, setCurrentSession] = useState(null);
     const [logoutLoading, setLogoutLoading] = useState(null);
-    const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
@@ -76,7 +85,7 @@ const Sessions = () => {
     };
 
     const handleLogoutAll = async () => {
-        setShowLogoutPopup(false);
+        setShowLogoutDialog(false);
         try {
             await logoutAll();
             await loadSessions(); // Refresh after logout all
@@ -84,8 +93,8 @@ const Sessions = () => {
         }
     };
 
-    const openLogoutPopup = () => {
-        setShowLogoutPopup(true);
+    const openLogoutDialog = () => {
+        setShowLogoutDialog(true);
     };
 
     const getDeviceIcon = (device, userAgent) => {
@@ -190,6 +199,9 @@ const Sessions = () => {
         // Check if session is active based on isActive flag or last activity
         if (session.isActive === false) return false;
 
+        // Current session is always considered active
+        if (isCurrentSession(session)) return true;
+
         const lastActive = getLastActive(session);
         if (lastActive) {
             try {
@@ -225,6 +237,8 @@ const Sessions = () => {
         if (sessions && sessions.length > 0) {
         }
     }, [sessions]);
+
+    const activeSessionCount = sessions?.filter(s => isSessionActive(s) && !isCurrentSession(s)).length || 0;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-4 sm:py-6 md:py-8">
@@ -266,7 +280,7 @@ const Sessions = () => {
                             </Button>
                             {sessions && sessions.length > 0 && (
                                 <Button
-                                    onClick={openLogoutPopup}
+                                    onClick={openLogoutDialog}
                                     variant="destructive"
                                     className="bg-red-600 hover:bg-red-700 text-white flex-1 sm:flex-none"
                                     size="sm"
@@ -308,13 +322,13 @@ const Sessions = () => {
                                         <div className="flex items-start gap-2">
                                             <Clock className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                                             <p className="text-xs sm:text-sm text-gray-600">
-                                                <span className="font-medium">Active sessions:</span> Devices active in last 30 minutes
+                                                <span className="font-medium">Active sessions:</span> Shows devices with recent activity
                                             </p>
                                         </div>
                                         <div className="flex items-start gap-2">
                                             <History className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
                                             <p className="text-xs sm:text-sm text-gray-600">
-                                                <span className="font-medium">Inactive sessions:</span> No recent activity
+                                                <span className="font-medium">Inactive sessions:</span> Shows devices with no recent activity
                                             </p>
                                         </div>
                                         <div className="flex items-start gap-2">
@@ -356,13 +370,18 @@ const Sessions = () => {
                                     Connected Devices
                                 </CardTitle>
                                 <Badge variant="secondary" className="bg-gray-100">
-                                    Last updated: {new Date().toLocaleTimeString()}
+                                    Last refreshed: {new Date().toLocaleTimeString()}
                                 </Badge>
                             </div>
                             <CardDescription className="text-sm">
-                                {sessions?.filter(s => isSessionActive(s)).length || 0} active session
-                                {(sessions?.filter(s => isSessionActive(s)).length || 0) !== 1 ? 's' : ''} ·
-                                {sessions?.filter(s => !isSessionActive(s) && !isCurrentSession(s)).length || 0} inactive
+                                <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
+                                        {sessions?.filter(s => isSessionActive(s)).length || 0} active
+                                    </Badge>
+                                    <Badge variant="secondary" className="bg-gray-100 text-gray-600 hover:bg-gray-100">
+                                        {sessions?.filter(s => !isSessionActive(s) && !isCurrentSession(s)).length || 0} inactive
+                                    </Badge>
+                                </div>
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -546,13 +565,42 @@ const Sessions = () => {
                 </motion.div>
             </div>
 
-            {/* Logout All Popup */}
-            <LogoutAllPopup
-                isOpen={showLogoutPopup}
-                onClose={() => setShowLogoutPopup(false)}
-                onConfirm={handleLogoutAll}
-                sessionCount={sessions?.length || 0}
-            />
+            {/* Alert Dialog for Logout All */}
+            <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-red-500" />
+                            Logout from All Devices
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {activeSessionCount > 0 ? (
+                                <>
+                                    You have {activeSessionCount} active session{activeSessionCount !== 1 ? 's' : ''} on other devices.
+                                    This action will log you out from all other devices. Your current session will remain active.
+                                </>
+                            ) : (
+                                "You don't have any other active sessions. Your current session will remain active."
+                            )}
+                            <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <p className="text-sm text-yellow-800 flex items-start gap-2">
+                                    <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                    <span>This action cannot be undone. You'll need to log in again on those devices.</span>
+                                </p>
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleLogoutAll}
+                            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+                        >
+                            Logout All Devices
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

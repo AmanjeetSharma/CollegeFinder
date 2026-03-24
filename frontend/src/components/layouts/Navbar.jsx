@@ -24,6 +24,7 @@ const navLinks = [
     { name: "How it Works", path: "/how-it-works", icon: BookOpen },
     { name: "Find Colleges", path: "/colleges", icon: Sparkles },
     { name: "About", path: "/about", icon: Info },
+    { name: "Contact", path: "/contact", icon: User },
 ];
 
 /* ─── helpers ───────────────────────────────────────────────── */
