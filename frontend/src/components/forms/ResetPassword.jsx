@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Eye, EyeOff, Lock, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
+import { Loader2, Eye, EyeOff, Lock, CheckCircle2, AlertCircle, ArrowLeft, Shield, Sparkles } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -128,194 +128,251 @@ const ResetPassword = () => {
         return { text: "Very Strong", color: "bg-green-500", width: "100%" };
     };
 
-    // If token is missing, show error
+    // If token is missing, show error with consistent layout
     if (!token) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 p-4">
+            <div className="min-h-screen flex flex-col items-center justify-between p-4 bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-100/30 rounded-full blur-3xl" />
-                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-red-100/40 rounded-full blur-3xl" />
+                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-100/30 rounded-full blur-3xl" />
+                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-stone-100/40 rounded-full blur-3xl" />
                 </div>
 
-                <Card className="w-full max-w-md relative overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-gray-900 to-red-500" />
-                    <CardHeader className="text-center pt-8 pb-6">
-                        <div className="flex justify-center mb-6">
-                            <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center shadow-lg shadow-red-100">
-                                <AlertCircle className="h-10 w-10 text-red-600" strokeWidth={1.5} />
+                <div className="w-full max-w-md flex-1 flex items-center py-8">
+                    <Card className="border shadow-2xl shadow-black/5 w-full relative overflow-hidden backdrop-blur-sm bg-white/95">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-stone-600 to-red-500" />
+                        <CardHeader className="text-center space-y-2 pt-8 pb-4">
+                            <div className="flex justify-center mb-6">
+                                <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center shadow-lg shadow-red-100">
+                                    <AlertCircle className="h-10 w-10 text-red-600" strokeWidth={1.5} />
+                                </div>
                             </div>
-                        </div>
-                        <CardTitle className="text-2xl font-light tracking-tight">
-                            Missing Token!
-                        </CardTitle>
-                        <CardDescription>
-                            No reset token was provided in the URL
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="px-8 pb-8">
-                        <div className="space-y-4">
-                            <Link to="/forgot-password">
-                                <Button className="w-full bg-gray-900 hover:bg-gray-800">
-                                    Request New Link
-                                </Button>
+                            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-stone-800 to-stone-600 bg-clip-text text-transparent">
+                                Missing Token!
+                            </CardTitle>
+                            <CardDescription className="text-muted-foreground">
+                                No reset token was provided in the URL
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="px-6 pb-8">
+                            <div className="space-y-3">
+                                <Link to="/forgot-password">
+                                    <Button className="w-full bg-stone-800 hover:bg-stone-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                                        Request New Link
+                                    </Button>
+                                </Link>
+                                <Link to="/login">
+                                    <Button variant="ghost" className="w-full text-stone-600 hover:text-stone-800 hover:bg-stone-50 transition-all">
+                                        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Sign In
+                                    </Button>
+                                </Link>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <footer className="w-full py-6 text-center border-t bg-white/50 backdrop-blur-sm">
+                    <div className="container mx-auto px-4">
+                        <p className="text-sm text-muted-foreground">
+                            &copy; {new Date().getFullYear()} CollegeFinder. All rights reserved.
+                        </p>
+                        <div className="flex justify-center gap-4 mt-2">
+                            <Link to="/terms" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                                Terms of Service
                             </Link>
-                            <Link to="/login">
-                                <Button variant="ghost" className="w-full">
-                                    Back to Login
-                                </Button>
+                            <span className="text-muted-foreground text-xs">•</span>
+                            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                                Privacy Policy
+                            </Link>
+                            <span className="text-muted-foreground text-xs">•</span>
+                            <Link to="/contact" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                                Contact Us
                             </Link>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </footer>
             </div>
         );
     }
 
     return (
         <>
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 p-4">
+            <div className="min-h-screen flex flex-col items-center justify-between p-4 bg-gradient-to-br from-slate-50 via-white to-slate-50">
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-100/30 rounded-full blur-3xl" />
                     <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-stone-100/40 rounded-full blur-3xl" />
                 </div>
 
-                <Card className="w-full max-w-md relative overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-900 via-indigo-500 to-gray-900" />
+                <div className="w-full max-w-md flex-1 flex items-center py-8">
+                    <Card className="border shadow-2xl shadow-black/5 w-full relative overflow-hidden backdrop-blur-sm bg-white/95">
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-stone-600 to-amber-500" />
 
-                    <CardHeader className="text-center pt-8 pb-6">
-                        <div className="flex justify-center mb-6">
-                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center shadow-lg">
-                                <Lock className="h-10 w-10 text-stone-700" strokeWidth={1.5} />
-                            </div>
-                        </div>
-                        <CardTitle className="text-2xl font-light tracking-tight">
-                            Create New Password
-                        </CardTitle>
-                        <CardDescription>
-                            Enter your new password below to reset your account
-                        </CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="px-8 pb-8">
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            {/* New Password Field */}
-                            <div className="space-y-2">
-                                <Label htmlFor="password">New Password</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="password"
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Enter new password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className={errors.password ? "border-red-500" : ""}
-                                        disabled={isSubmitting}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                    >
-                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
+                        <CardHeader className="text-center space-y-2 pt-8 pb-4">
+                            <div className="flex justify-center mb-6">
+                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center shadow-lg shadow-indigo-100">
+                                    <Lock className="h-10 w-10 text-stone-700" strokeWidth={1.5} />
                                 </div>
-                                {errors.password && (
-                                    <p className="text-xs text-red-500">{errors.password}</p>
-                                )}
+                            </div>
+                            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-stone-800 to-stone-600 bg-clip-text text-transparent">
+                                Create New Password
+                            </CardTitle>
+                            <CardDescription className="text-muted-foreground">
+                                Enter your new password below to reset your account
+                            </CardDescription>
+                        </CardHeader>
 
-                                {/* Password Strength Indicator */}
-                                {password && !errors.password && (
-                                    <div className="mt-2 space-y-1">
-                                        <div className="flex justify-between text-xs">
-                                            <span className="text-gray-500">Password strength:</span>
-                                            <span className={`font-medium ${getPasswordStrength().text === "Very Weak" ? "text-red-500" :
-                                                getPasswordStrength().text === "Weak" ? "text-orange-500" :
+                        <CardContent className="px-6 pb-8">
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                {/* New Password Field */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="password" className="text-stone-700">New Password</Label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                                        <Input
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Enter new password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className={`pl-9 pr-9 border-stone-200 focus:border-stone-400 transition-all ${errors.password ? "border-red-500" : ""}`}
+                                            disabled={isSubmitting}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    </div>
+                                    {errors.password && (
+                                        <p className="text-xs text-red-500">{errors.password}</p>
+                                    )}
+
+                                    {/* Password Strength Indicator */}
+                                    {password && !errors.password && (
+                                        <div className="mt-2 space-y-1">
+                                            <div className="flex justify-between text-xs">
+                                                <span className="text-stone-500">Password strength:</span>
+                                                <span className={`font-medium ${
+                                                    getPasswordStrength().text === "Very Weak" ? "text-red-500" :
+                                                    getPasswordStrength().text === "Weak" ? "text-orange-500" :
                                                     getPasswordStrength().text === "Medium" ? "text-yellow-500" :
-                                                        getPasswordStrength().text === "Strong" ? "text-blue-500" :
-                                                            "text-green-500"
+                                                    getPasswordStrength().text === "Strong" ? "text-blue-500" :
+                                                    "text-green-500"
                                                 }`}>
-                                                {getPasswordStrength().text}
-                                            </span>
+                                                    {getPasswordStrength().text}
+                                                </span>
+                                            </div>
+                                            <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full transition-all duration-300 ${getPasswordStrength().color}`}
+                                                    style={{ width: getPasswordStrength().width }}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full transition-all duration-300 ${getPasswordStrength().color}`}
-                                                style={{ width: getPasswordStrength().width }}
-                                            />
-                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Confirm Password Field */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="confirmPassword" className="text-stone-700">Confirm New Password</Label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                                        <Input
+                                            id="confirmPassword"
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            placeholder="Confirm new password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className={`pl-9 pr-9 border-stone-200 focus:border-stone-400 transition-all ${errors.confirmPassword ? "border-red-500" : ""}`}
+                                            disabled={isSubmitting}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                                        >
+                                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    </div>
+                                    {errors.confirmPassword && (
+                                        <p className="text-xs text-red-500">{errors.confirmPassword}</p>
+                                    )}
+                                </div>
+
+                                {/* Password Requirements */}
+                                {password && (
+                                    <div className="bg-gradient-to-br from-amber-50 to-stone-50 rounded-lg p-3 border border-amber-200">
+                                        <p className="font-medium text-stone-700 mb-2 text-sm">Password requirements:</p>
+                                        <ul className="space-y-1 text-xs text-stone-600">
+                                            <li className={`flex items-center gap-2 ${password.length >= 8 ? "text-green-600" : ""}`}>
+                                                {password.length >= 8 ? "✓" : "○"} At least 8 characters
+                                            </li>
+                                            <li className={`flex items-center gap-2 ${/[A-Z]/.test(password) ? "text-green-600" : ""}`}>
+                                                {/[A-Z]/.test(password) ? "✓" : "○"} At least one uppercase letter
+                                            </li>
+                                            <li className={`flex items-center gap-2 ${/[a-z]/.test(password) ? "text-green-600" : ""}`}>
+                                                {/[a-z]/.test(password) ? "✓" : "○"} At least one lowercase letter
+                                            </li>
+                                            <li className={`flex items-center gap-2 ${/[0-9]/.test(password) ? "text-green-600" : ""}`}>
+                                                {/[0-9]/.test(password) ? "✓" : "○"} At least one number
+                                            </li>
+                                            <li className={`flex items-center gap-2 ${/[^A-Za-z0-9]/.test(password) ? "text-green-600" : ""}`}>
+                                                {/[^A-Za-z0-9]/.test(password) ? "✓" : "○"} At least one special character
+                                            </li>
+                                        </ul>
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Confirm Password Field */}
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="confirmPassword"
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        placeholder="Confirm new password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className={errors.confirmPassword ? "border-red-500" : ""}
-                                        disabled={isSubmitting}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                    >
-                                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
+                                {/* Security note */}
+                                <div className="bg-gradient-to-br from-stone-50 to-white rounded-lg p-3 border border-stone-200/60">
+                                    <div className="flex items-center gap-2 text-xs text-stone-500">
+                                        <Shield className="h-3 w-3" />
+                                        <span>Your new password will be encrypted and secured</span>
+                                    </div>
                                 </div>
-                                {errors.confirmPassword && (
-                                    <p className="text-xs text-red-500">{errors.confirmPassword}</p>
-                                )}
-                            </div>
 
-                            {/* Password Requirements */}
-                            {password && (
-                                <div className="bg-gray-50 rounded-lg p-3 text-xs space-y-1">
-                                    <p className="font-medium text-gray-700 mb-1">Password requirements:</p>
-                                    <ul className="space-y-1 text-gray-600">
-                                        <li className={`flex items-center gap-1 ${password.length >= 8 ? "text-green-600" : ""}`}>
-                                            {password.length >= 8 ? "✓" : "○"} At least 8 characters
-                                        </li>
-                                        <li className={`flex items-center gap-1 ${/[A-Z]/.test(password) ? "text-green-600" : ""}`}>
-                                            {/[A-Z]/.test(password) ? "✓" : "○"} At least one uppercase letter
-                                        </li>
-                                        <li className={`flex items-center gap-1 ${/[a-z]/.test(password) ? "text-green-600" : ""}`}>
-                                            {/[a-z]/.test(password) ? "✓" : "○"} At least one lowercase letter
-                                        </li>
-                                        <li className={`flex items-center gap-1 ${/[0-9]/.test(password) ? "text-green-600" : ""}`}>
-                                            {/[0-9]/.test(password) ? "✓" : "○"} At least one number
-                                        </li>
-                                        <li className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(password) ? "text-green-600" : ""}`}>
-                                            {/[^A-Za-z0-9]/.test(password) ? "✓" : "○"} At least one special character
-                                        </li>
-                                    </ul>
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-stone-800 hover:bg-stone-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                                    disabled={isSubmitting}
+                                    size="lg"
+                                >
+                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSubmitting ? "Resetting Password..." : "Reset Password"}
+                                </Button>
+
+                                <div className="text-center">
+                                    <Link to="/login" className="text-sm text-stone-600 hover:text-stone-800 inline-flex items-center gap-1 transition-colors">
+                                        <ArrowLeft className="h-3 w-3" />
+                                        Back to Sign In
+                                    </Link>
                                 </div>
-                            )}
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                            <Button
-                                type="submit"
-                                className="w-full bg-gray-900 hover:bg-gray-800"
-                                disabled={isSubmitting}
-                                size="lg"
-                            >
-                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSubmitting ? "Resetting Password..." : "Reset Password"}
-                            </Button>
-
-                            <div className="text-center">
-                                <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900 inline-flex items-center gap-1">
-                                    <ArrowLeft className="h-3 w-3" />
-                                    Back to Login
-                                </Link>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                <footer className="w-full py-6 text-center border-t bg-white/50 backdrop-blur-sm">
+                    <div className="container mx-auto px-4">
+                        <p className="text-sm text-muted-foreground">
+                            &copy; {new Date().getFullYear()} CollegeFinder. All rights reserved.
+                        </p>
+                        <div className="flex justify-center gap-4 mt-2">
+                            <Link to="/terms" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                                Terms of Service
+                            </Link>
+                            <span className="text-muted-foreground text-xs">•</span>
+                            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                                Privacy Policy
+                            </Link>
+                            <span className="text-muted-foreground text-xs">•</span>
+                            <Link to="/contact" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                                Contact Us
+                            </Link>
+                        </div>
+                    </div>
+                </footer>
             </div>
 
             {/* Success Dialog */}
@@ -323,17 +380,17 @@ const ResetPassword = () => {
                 <AlertDialogContent className="max-w-md">
                     <AlertDialogHeader className="text-center">
                         <div className="flex justify-center mb-4">
-                            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                                <CheckCircle2 className="h-8 w-8 text-green-600" />
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center shadow-lg shadow-emerald-100">
+                                <CheckCircle2 className="h-8 w-8 text-emerald-600" strokeWidth={1.5} />
                             </div>
                         </div>
-                        <AlertDialogTitle className="text-2xl font-semibold">
+                        <AlertDialogTitle className="text-2xl font-semibold text-stone-800">
                             Password Changed!
                         </AlertDialogTitle>
-                        <AlertDialogDescription className="text-gray-600">
+                        <AlertDialogDescription className="text-stone-600">
                             Your password has been successfully reset.
                             <br />
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-stone-500">
                                 Redirecting to login in {countdown} seconds...
                             </span>
                         </AlertDialogDescription>
@@ -341,7 +398,7 @@ const ResetPassword = () => {
                     <AlertDialogFooter className="flex justify-center">
                         <AlertDialogAction
                             onClick={handleGoToLogin}
-                            className="bg-gray-900 hover:bg-gray-800 text-white"
+                            className="bg-stone-800 hover:bg-stone-700 text-white"
                         >
                             Go to Login Page
                         </AlertDialogAction>
