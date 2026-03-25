@@ -98,7 +98,7 @@ const DesktopInfoLinks = memo(({ navigate, currentPath }) => (
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(link.path)}
-                    className={`px-4 py-2 h-auto transition-colors ${
+                    className={`px-4 py-2 h-auto transition-colors cursor-pointer ${
                         isActive ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-700"
                     }`}
                 >
@@ -246,10 +246,10 @@ const Navbar = () => {
                                 <UserDropdown user={user} navigate={navigate} onLogout={handleLogout} />
                             ) : (
                                 <>
-                                    <GhostButton href="/login" icon={User}>
+                                    <GhostButton href="/login" icon={User} className="cursor-pointer">
                                         Sign In
                                     </GhostButton>
-                                    <PremiumButton href="/register">
+                                    <PremiumButton href="/register" className="cursor-pointer">
                                         <Sparkles className="h-4 w-4" />
                                         Get Started
                                     </PremiumButton>
