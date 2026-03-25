@@ -57,9 +57,15 @@ export const ScrollToTopButton = () => {
                     <Button
                         onClick={scrollToTop}
                         size="icon"
-                        className="h-10 w-10 rounded-full shadow-lg bg-gray-900 hover:bg-gray-800 text-white"
+                        className="relative h-10 w-10 rounded-full shadow-lg bg-gray-900 hover:bg-gray-800 text-white 
+               border-2 border-amber-400/60 hover:border-white/50 transition-all duration-300
+               overflow-hidden group cursor-pointer"
                     >
-                        <ChevronUp className="h-5 w-5" />
+                        {/* Shine effect overlay */}
+                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out 
+                    bg-linear-to-r from-transparent via-white/30 to-transparent skew-x-12" />
+
+                        <ChevronUp className="h-5 w-5 relative z-10" />
                     </Button>
                 </motion.div>
             )}

@@ -193,7 +193,7 @@ export default function Register() {
                                 Create an Account
                             </CardTitle>
                             <CardDescription className="text-muted-foreground">
-                                Join Schaden and experience premium service
+                                Ready to get your personalized college recommendations?
                             </CardDescription>
                         </CardHeader>
 
@@ -354,7 +354,7 @@ export default function Register() {
                 <footer className="w-full py-6 text-center border-t mt-8">
                     <div className="container mx-auto px-4">
                         <p className="text-sm text-muted-foreground">
-                            &copy; {new Date().getFullYear()} Schaden. All rights reserved.
+                            &copy; {new Date().getFullYear()} CollegeFinder. All rights reserved.
                         </p>
                         <div className="flex justify-center gap-4 mt-2">
                             <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">

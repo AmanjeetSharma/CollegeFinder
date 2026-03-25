@@ -63,7 +63,7 @@ export default function Login() {
                             Welcome Back
                         </CardTitle>
                         <CardDescription className="text-muted-foreground">
-                            Sign in to access your premium account
+                            Sign in to your account to continue
                         </CardDescription>
                     </CardHeader>
 
