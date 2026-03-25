@@ -129,13 +129,10 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const emailHTML = resetPasswordEmail(resetLink);
 
-    // await sendEmail(
-    //     user.email,
-    //     "Reset Your Password - CollegeFinder",
-    //     emailHTML,
-    //     true
-    // );
-    
+    if (process.env.EMAIL_ENABLED === 'true') { // Only send email if enabled in environment variables
+        await sendEmail(user.email, "Reset Your Password - CollegeFinder", emailHTML, true);
+    }
+
     console.log(`Reset link generated for ${user.email}: ${resetLink}`); // log the reset link for testing since email sending is disabled
 
     return res.status(200).json(

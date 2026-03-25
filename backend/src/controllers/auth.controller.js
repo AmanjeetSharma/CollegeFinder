@@ -67,14 +67,12 @@ const register = asyncHandler(async (req, res) => {
 
     const emailHTML = registerEmail(verifyLink);
 
-    // await sendEmail(
-    //     email,
-    //     "Kindly Verify Your Email Address - Complete Your Registration",
-    //     emailHTML,
-    //     true
-    // );
+    if (process.env.EMAIL_ENABLED === 'true') { // Only send email if enabled in environment variables
+        await sendEmail(email, "Kindly Verify Your Email Address - Complete Your Registration", emailHTML, true);
+    }
 
     console.log(`Verification email sent to ${email} with link: ${verifyLink}`); // temporary log since email sending is disabled for testing
+
 
     return res.status(200).json(
         new ApiResponse(
@@ -136,13 +134,10 @@ const verifyEmail = asyncHandler(async (req, res) => {
     console.log(`Email verified | User: ${user.email} | ID: ${user._id}`);
 
     const welcomeHTML = welcomeEmail(user.name || user.email.split('@')[0]);
-    
-    // await sendEmail(
-    //     user.email,
-    //     "Welcome to CollegeFinder! 🎓",
-    //     welcomeHTML,
-    //     true
-    // );
+
+    // if (process.env.EMAIL_ENABLED === 'true') { // Only send email if enabled in environment variables
+    //     await sendEmail(user.email, "Welcome to CollegeFinder! 🎓", welcomeHTML, true);
+    // }
 
     return res
         .status(200)
