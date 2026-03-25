@@ -1,8 +1,8 @@
 // components/ChangePassword.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { usePassword } from "../context/PasswordContext";
+import { useAuth } from "../../context/AuthContext";
+import { usePassword } from "../../context/PasswordContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
