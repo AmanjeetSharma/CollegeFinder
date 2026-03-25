@@ -133,7 +133,6 @@ export const PasswordProvider = ({ children }) => {
             schadenToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
-                description: "The reset link may have expired or is invalid",
             });
             throw err;
         } finally {
