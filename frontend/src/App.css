@@ -20,6 +20,9 @@
 [data-sonner-toast][data-type="success"] [data-description] {
   color: white !important;
 }
+[data-sonner-toast][data-type="info"] [data-description] {
+  color: white !important;
+}
 [data-sonner-toast] button {
   border: 1px solid rgba(0, 0, 0, 0.7) !important;
   border-radius: 6px;

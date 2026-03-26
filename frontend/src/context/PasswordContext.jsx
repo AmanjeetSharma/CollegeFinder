@@ -66,12 +66,11 @@ export const PasswordProvider = ({ children }) => {
         try {
             const { data } = await axiosInstance.post("/password/forgot-password", { email });
 
-            // ⚠️ Always generic message (security)
-            schadenToast.success(
+            schadenToast.info(  // Using info toast since we don't want to imply success if the email doesn't exist
                 data?.message ||
                 "If this email exists, a reset link has been sent",
                 {
-                    duration: 5000,
+                    duration: 6000,
                     position: "top-center",
                     description: "Please check your inbox or spam folder",
                     icon: <IoIosMail size={20} />,

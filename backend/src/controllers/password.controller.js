@@ -132,8 +132,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
     if (process.env.EMAIL_ENABLED === 'true') { // Only send email if enabled in environment variables
         await sendEmail(user.email, "Reset Your Password - CollegeFinder", emailHTML, true);
     }
+    console.log(`[sendEmail] for password reset: ${process.env.EMAIL_ENABLED === 'true' ? 'Email sent' : 'Email sending disabled, skipping...'}`);
 
-    console.log(`Reset link generated for ${user.email}: ${resetLink}`); // log the reset link for testing since email sending is disabled
+    console.log(`Reset link for ${user.email}: ${resetLink}`); // log the reset link for testing since email sending is disabled
 
     return res.status(200).json(
         new ApiResponse(200, null, "If this email exists, a reset link has been sent")

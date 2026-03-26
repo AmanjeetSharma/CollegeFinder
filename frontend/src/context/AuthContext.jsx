@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
 
-            schadenToast.success(data?.message || "Verification email sent!", {
+            schadenToast.info(data?.message || "Verification email sent!", { // info because they need to check their email
                 duration: 10000,
                 position: "top-center",
                 description: "Please check your inbox to verify your account",
@@ -184,6 +184,9 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             const res = await axiosInstance.post("/auth/logout");
+            if (res.data?.success) {
+                clearSession(); // Clear session only on successful logout
+            }
             schadenToast.success(res.data?.message || "Logged out successfully", {
                 duration: 2000,
                 position: "top-center",

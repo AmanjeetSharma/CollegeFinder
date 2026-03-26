@@ -52,7 +52,7 @@ export default function ForgotPassword() {
             <div className="w-full max-w-md flex-1 flex items-center">
                 <Card className="border shadow-2xl shadow-black/5 w-full relative overflow-hidden backdrop-blur-sm bg-white/95">
                     {/* Premium accent line */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-stone-600 to-amber-500" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-600 via-gray-900 to-indigo-600" />
 
                     <CardHeader className="text-center space-y-2 pt-8 pb-4">
                         <CardTitle className="text-3xl font-bold bg-gradient-to-r from-stone-800 to-stone-600 bg-clip-text text-transparent">
@@ -154,7 +154,7 @@ export default function ForgotPassword() {
                 </Card>
             </div>
 
-            {/* Premium Footer */}
+            {/* Footer */}
             <footer className="w-full py-6 text-center border-t mt-8 bg-white/50 backdrop-blur-sm">
                 <div className="container mx-auto px-4">
                     <p className="text-sm text-muted-foreground">
