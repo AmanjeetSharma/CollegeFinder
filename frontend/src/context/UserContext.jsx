@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "@/components/schadenToast/toast-config";
+import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
 
 const UserContext = createContext(null);
 
@@ -35,7 +35,6 @@ export const UserProvider = ({ children }) => {
                 duration: 3000,
                 position: "top-center",
                 description: "Your information has been saved",
-                icon: "✅",
             });
 
             return updatedUser;
@@ -107,10 +106,8 @@ export const UserProvider = ({ children }) => {
                 duration: 3000,
                 position: "top-center",
                 description: "The device has been logged out",
-                icon: "🔒",
             });
 
-            // 🔥 refresh sessions
             await getUserSessions();
         } catch (err) {
             const msg =
@@ -133,33 +130,36 @@ export const UserProvider = ({ children }) => {
 
 
 
-    // LOGOUT ALL OTHER SESSIONS (Bulk action)
-    const logoutAllOtherSessions = async () => {
-        schadenToast.promise(
-            async () => {
-                const { data } = await axiosInstance.post("/user/sessions/logout-all");
+    // LOGOUT ALL OTHER SESSIONS
+   const logoutAllOtherSessions = async () => {
+    try {
+        schadenToast.info("Terminating other sessions...", {
+            position: "top-center",
+        });
 
-                if (!data.success) throw new Error(data.message);
-                await getUserSessions();
-                return data;
-            },
+        const { data } = await axiosInstance.post("/user/sessions/logout-all");
+
+        if (!data.success) throw new Error(data.message);
+
+        await getUserSessions();
+
+        schadenToast.success(data?.message || "All other sessions terminated", {
+            description: "Your account is now only active on this device",
+            position: "top-center",
+            duration: 4000,
+        });
+
+    } catch (err) {
+        schadenToast.error(
+            err?.response?.data?.message || "Failed to terminate sessions",
             {
-                loading: "Terminating other sessions...",
-                success: (data) => ({
-                    message: data?.message || "All other sessions terminated",
-                    description: "Your account is now only active on this device",
-                    icon: "🔒",
-                }),
-                error: (err) => ({
-                    message: err?.response?.data?.message || "Failed to terminate sessions",
-                    description: "Please try again or contact support",
-                }),
+                description: "Please try again or contact support",
                 position: "top-center",
                 duration: 4000,
             }
         );
-    };
-
+    }
+};
 
 
 

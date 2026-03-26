@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "../components/schadenToast/toast-config";
+import { schadenToast } from "../components/schadenToast/ToastConfig.jsx";
+import { IoIosMail } from "react-icons/io";
 
 const PasswordContext = createContext(null);
 
@@ -31,7 +32,6 @@ export const PasswordProvider = ({ children }) => {
                     duration: 4000,
                     position: "top-center",
                     description: "You will be redirected to login",
-                    icon: "🔐",
                 }
             );
 
@@ -73,8 +73,8 @@ export const PasswordProvider = ({ children }) => {
                 {
                     duration: 5000,
                     position: "top-center",
-                    description: "Please check your inbox and spam folder",
-                    icon: "📧",
+                    description: "Please check your inbox or spam folder",
+                    icon: <IoIosMail size={20} />,
                 }
             );
 
@@ -118,7 +118,6 @@ export const PasswordProvider = ({ children }) => {
                     duration: 4000,
                     position: "top-center",
                     description: "You can now login with your new password",
-                    icon: "✅",
                 }
             );
 

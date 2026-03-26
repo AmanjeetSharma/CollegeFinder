@@ -109,7 +109,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
     if (pending.verificationTokenExpiry < Date.now()) {
         const timeInfo = getTimeDifference(pending.verificationTokenExpiry);
-        console.log(`❌ Token expired ${timeInfo} ago | Email: ${pending.email}`);
+        console.log(`Token expired ${timeInfo} ago | Email: ${pending.email}`);
 
         throw new ApiError(
             400,
@@ -309,13 +309,12 @@ const logoutAll = asyncHandler(async (req, res) => {
     let currentSessionFound = false;
 
     user.sessions = user.sessions.map((session) => {
-        // 🔥 Keep current session
+
         if (session.refreshToken === currentToken) {
             currentSessionFound = true;
             return session;
         }
 
-        // ❌ Kill all other sessions
         return {
             ...session.toObject(),
             isActive: false,
@@ -380,7 +379,7 @@ const refresh = asyncHandler(async (req, res) => {
     );
 
     if (!session) {
-        console.log("❌ Invalid session or session is inactive");
+        // console.log("Invalid session or session is inactive"); // Debug log
         throw new ApiError(403, "Invalid session or session is inactive");
     }
 

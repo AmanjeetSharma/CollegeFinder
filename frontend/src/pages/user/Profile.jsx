@@ -129,7 +129,7 @@ const Profile = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-4 sm:mb-6 md:mb-8"
                 >
-                    {/* Mobile Back Button and Actions Row */}
+                    {/* Mobile Back Button */}
                     <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
                         <Button
                             variant="ghost"
@@ -175,40 +175,11 @@ const Profile = () => {
                     </div>
 
                     {/* Desktop Header */}
-                    <div className="hidden sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                                My Profile
-                            </h1>
-                            <p className="text-sm sm:text-base text-gray-500 mt-1">Manage your personal information and preferences</p>
-                        </div>
-                        <div className="flex gap-3">
-                            <Button
-                                onClick={() => navigate('/change-password')}
-                                variant="outline"
-                                className="border-gray-300 hover:bg-gray-50"
-                            >
-                                <Key className="h-4 w-4 mr-2" />
-                                Change Password
-                            </Button>
-                            <Button
-                                onClick={() => setIsEditing(!isEditing)}
-                                variant={isEditing ? "destructive" : "default"}
-                                className={!isEditing ? "bg-gray-900 hover:bg-gray-800" : ""}
-                            >
-                                {isEditing ? (
-                                    <>
-                                        <GoXCircle className="h-4 w-4 mr-2" />
-                                        Cancel
-                                    </>
-                                ) : (
-                                    <>
-                                        <Edit2 className="h-4 w-4 mr-2" />
-                                        Edit Profile
-                                    </>
-                                )}
-                            </Button>
-                        </div>
+                    <div className="hidden sm:block">
+                        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                            My Profile
+                        </h1>
+                        <p className="text-sm sm:text-base text-gray-500 mt-1">Manage your personal information and preferences</p>
                     </div>
 
                     {/* Mobile Header Text */}
@@ -313,8 +284,8 @@ const Profile = () => {
 
                 {/* Main Profile Content */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-5">
-                    {/* Desktop Tabs */}
-                    <div className="hidden sm:block">
+                    {/* Desktop Tabs with Action Buttons on the Right */}
+                    <div className="hidden sm:flex sm:items-center sm:justify-between">
                         <TabsList className="inline-flex bg-transparent border-0 p-0 gap-2 md:gap-3">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
@@ -330,6 +301,35 @@ const Profile = () => {
                                 );
                             })}
                         </TabsList>
+
+                        {/* Action Buttons on the Right */}
+                        <div className="flex gap-3">
+                            <Button
+                                onClick={() => navigate('/change-password')}
+                                variant="outline"
+                                className="border-gray-300 hover:bg-gray-50"
+                            >
+                                <Key className="h-4 w-4 mr-2" />
+                                Change Password
+                            </Button>
+                            <Button
+                                onClick={() => setIsEditing(!isEditing)}
+                                variant={isEditing ? "destructive" : "default"}
+                                className={!isEditing ? "bg-gray-900 hover:bg-gray-800" : ""}
+                            >
+                                {isEditing ? (
+                                    <>
+                                        <GoXCircle className="h-4 w-4 mr-2" />
+                                        Cancel
+                                    </>
+                                ) : (
+                                    <>
+                                        <Edit2 className="h-4 w-4 mr-2" />
+                                        Edit Profile
+                                    </>
+                                )}
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Personal Info Tab */}

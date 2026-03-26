@@ -69,14 +69,6 @@ export default function Login() {
 
                     <form onSubmit={handleSubmit}>
                         <CardContent className="space-y-5 px-6 pb-2">
-                            {error && (
-                                <div className="p-3 rounded-lg bg-red-50 border border-red-200 shadow-sm">
-                                    <p className="text-sm text-red-600 text-center">
-                                        {error}
-                                    </p>
-                                </div>
-                            )}
-
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="text-stone-700">
                                     Email Address
@@ -131,7 +123,7 @@ export default function Login() {
                             </div>
 
                             {/* Security note */}
-                            <div className="bg-gradient-to-br from-stone-50 to-white rounded-lg p-3 border border-stone-200/60">
+                            <div className="bg-linear-to-br from-stone-50 to-white rounded-lg p-3 border border-stone-200/60">
                                 <div className="flex items-center gap-2 text-xs text-stone-500">
                                     <Shield className="h-3 w-3" />
                                     <span>Your data is encrypted and secure</span>

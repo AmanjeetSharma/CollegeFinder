@@ -28,7 +28,7 @@ const infoLinks = [
 
 // Premium Button with Shiny Hover Effect
 const PremiumButton = memo(({ children, onClick, href, className = "" }) => {
-    const baseClasses = "relative inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-black to-gray-800 text-white shadow-md overflow-hidden group transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]";
+    const baseClasses = "relative inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-black to-gray-800 text-white shadow-md overflow-hidden group transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]";
 
     const inner = (
         <button onClick={onClick} className={`${baseClasses} ${className}`}>

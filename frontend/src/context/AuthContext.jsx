@@ -5,8 +5,9 @@ import {
     useState,
     useCallback,
 } from "react";
+import { IoIosMail } from "react-icons/io";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "@/components/schadenToast/toast-config";
+import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
 
 const AuthContext = createContext(null);
 
@@ -72,10 +73,10 @@ export const AuthProvider = ({ children }) => {
             });
 
             schadenToast.success(data?.message || "Verification email sent!", {
-                duration: 4000,
+                duration: 10000,
                 position: "top-center",
                 description: "Please check your inbox to verify your account",
-                icon: "✉️",
+                icon: <IoIosMail size={20} />,
             });
 
             return data?.data;
@@ -86,7 +87,7 @@ export const AuthProvider = ({ children }) => {
             schadenToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
-                description: "Please check your information and try again",
+                description: "Something went wrong. Please try again",
             });
             throw err;
         }
@@ -111,7 +112,6 @@ export const AuthProvider = ({ children }) => {
                 duration: 5000,
                 position: "top-center",
                 description: "You can now login to your account",
-                icon: "✅",
             });
 
             return true;
@@ -157,7 +157,6 @@ export const AuthProvider = ({ children }) => {
                 duration: 3000,
                 position: "top-center",
                 description: `Logged in as ${userData.name || email}`,
-                icon: "👋",
             });
 
             return userData;
@@ -184,21 +183,16 @@ export const AuthProvider = ({ children }) => {
     // LOGOUT (CURRENT DEVICE)
     const logout = async () => {
         try {
-            await axiosInstance.post("/auth/logout");
-            schadenToast.success("Logged out successfully", {
+            const res = await axiosInstance.post("/auth/logout");
+            schadenToast.success(res.data?.message || "Logged out successfully", {
                 duration: 2000,
                 position: "top-center",
-                icon: "👋",
             });
         } catch (err) {
-            console.warn("Logout API failed, clearing locally");
-            schadenToast.warning("Logged out locally", { //means
-                duration: 2000,
+            schadenToast.error(res?.data?.message || "Logout failed", {
+                duration: 4000,
                 position: "top-center",
-                description: "Your session has been cleared from this device",
             });
-        } finally {
-            clearSession();
         }
     };
 

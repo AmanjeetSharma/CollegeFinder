@@ -1,4 +1,3 @@
-/* Add to your index.css or globals.css */
 @keyframes slide-down {
     from {
         opacity: 0;
@@ -12,4 +11,16 @@
 
 .animate-slide-down {
     animation: slide-down 0.2s ease-out;
+}
+
+/* Override Sonner's default styles */
+[data-sonner-toast][data-type="error"] [data-description] {
+  color: white !important;
+}
+[data-sonner-toast][data-type="success"] [data-description] {
+  color: white !important;
+}
+[data-sonner-toast] button {
+  border: 1px solid rgba(0, 0, 0, 0.7) !important;
+  border-radius: 6px;
 }
