@@ -228,17 +228,22 @@ const ChangePasswordPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-between p-4 pt-16 bg-gradient-to-br from-slate-50 via-white to-slate-50">
-            {/* Decorative elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-100/30 rounded-full blur-3xl" />
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-stone-100/40 rounded-full blur-3xl" />
+        <div className="min-h-screen flex flex-col items-center justify-between p-4 pt-16 bg-gradient-to-br from-slate-50 via-white to-slate-50 relative">
+            {/* Back to Profile Link - Top Left */}
+            <div className="absolute top-4 left-4 z-10">
+                <Link
+                    to="/profile"
+                    className="inline-flex items-center gap-2 px-3 py-2 font-semibold text-sm text-gray-900 hover:text-stone-800 transition-colors group bg-white/50 hover:bg-gray-200 rounded-lg backdrop-blur-sm"
+                >
+                    <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                    Back to Profile
+                </Link>
             </div>
 
             <div className="w-full max-w-md flex-1 flex items-center">
                 <Card className="border shadow-2xl shadow-black/5 w-full relative overflow-hidden backdrop-blur-sm bg-white/95">
                     {/* Premium accent line */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-stone-600 to-amber-500" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-900 via-indigo-600 to-gray-900" />
 
                     <CardHeader className="text-center space-y-2 pt-8 pb-4">
                         <CardTitle className="text-3xl font-bold bg-gradient-to-r from-stone-800 to-stone-600 bg-clip-text text-transparent">
@@ -436,18 +441,12 @@ const ChangePasswordPage = () => {
                                     Change Password
                                 </Button>
                             </div>
-
-                            <div className="text-center text-sm mt-6">
-                                <Link to="/profile" className="text-stone-600 hover:text-stone-800 transition-colors">
-                                    ← Back to Profile
-                                </Link>
-                            </div>
                         </div>
                     </form>
                 </Card>
             </div>
 
-            {/* Premium Footer */}
+            {/* Footer */}
             <footer className="w-full py-6 text-center border-t mt-8 bg-white/50 backdrop-blur-sm">
                 <div className="container mx-auto px-4">
                     <p className="text-sm text-muted-foreground">
