@@ -70,8 +70,8 @@ const Logo = memo(() => (
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
         </div>
         <div className="flex flex-col leading-tight">
-            <span className="text-xl font-black tracking-tight bg-gray-900 bg-clip-text text-transparent" 
-                  style={{ fontFamily: "'Poppins', 'Inter', system-ui, -apple-system, sans-serif", letterSpacing: '-0.02em' }}>
+            <span className="text-xl font-black tracking-tight bg-gray-900 bg-clip-text text-transparent"
+                style={{ fontFamily: "'Poppins', 'Inter', system-ui, -apple-system, sans-serif", letterSpacing: '-0.02em' }}>
                 CollegeFinder
             </span>
             <span className="text-[10px] font-medium text-gray-700 tracking-wide">Your Future Starts Here</span>
@@ -98,9 +98,7 @@ const DesktopInfoLinks = memo(({ navigate, currentPath }) => (
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(link.path)}
-                    className={`px-4 py-2 h-auto transition-colors cursor-pointer ${
-                        isActive ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-700"
-                    }`}
+                    className={`px-4 py-2 h-auto transition-colors cursor-pointer ${isActive ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-700"}`}
                 >
                     <span className="text-sm font-medium">{link.label}</span>
                 </Button>
@@ -111,7 +109,7 @@ const DesktopInfoLinks = memo(({ navigate, currentPath }) => (
 
 DesktopInfoLinks.displayName = 'DesktopInfoLinks';
 
-// Simple Mobile Info Links
+// Mobile Info Links
 const MobileInfoLinks = memo(({ navigate, onClose, currentPath }) => (
     <div className="grid grid-cols-3 gap-2 p-2">
         {infoLinks.map(({ label, path }) => {
@@ -121,11 +119,10 @@ const MobileInfoLinks = memo(({ navigate, onClose, currentPath }) => (
                     key={path}
                     to={path}
                     onClick={onClose}
-                    className={`flex flex-col items-center gap-2 py-3 px-2 rounded-xl transition-colors ${
-                        isActive
+                    className={`flex flex-col items-center gap-2 py-3 px-2 rounded-xl transition-colors ${isActive
                             ? "bg-gray-900 text-white"
-                            : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                    }`}
+                            : "bg-gray-100 hover:bg-gray-100 text-gray-700"
+                        }`}
                 >
                     <span className="text-xs font-semibold">{label}</span>
                 </Link>
@@ -204,16 +201,15 @@ const Navbar = () => {
     return (
         <>
             {/* Add Poppins font for fun branding */}
-            <link 
-                href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" 
+            <link
+                href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap"
                 rel="stylesheet"
             />
             <nav
-                className={`sticky top-0 z-50 transition-all duration-200 ${
-                    scrolled
+                className={`sticky top-0 z-50 transition-all duration-200 ${scrolled
                         ? "bg-white/95 border-b border-gray-200 shadow-sm"
                         : "bg-white border-b border-gray-100"
-                }`}
+                    }`}
                 ref={mobileMenuRef}
                 style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
             >
@@ -226,11 +222,10 @@ const Navbar = () => {
                             {navLinks.map((link) => (
                                 <Link key={link.path} to={link.path}>
                                     <div
-                                        className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                                            isActive(link.path)
+                                        className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-colors ${isActive(link.path)
                                                 ? "text-gray-900 bg-gray-100"
                                                 : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                                        }`}
+                                            }`}
                                     >
                                         {link.name}
                                     </div>
@@ -284,11 +279,10 @@ const Navbar = () => {
                                             key={link.path}
                                             to={link.path}
                                             onClick={() => setMobileOpen(false)}
-                                            className={`flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
-                                                isActive(link.path)
+                                            className={`flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-colors ${isActive(link.path)
                                                     ? "bg-gray-900 text-white"
                                                     : "text-gray-700 hover:bg-gray-100"
-                                            }`}
+                                                }`}
                                         >
                                             {link.name}
                                         </Link>
@@ -301,7 +295,7 @@ const Navbar = () => {
                                         <div className="w-full border-t border-gray-200"></div>
                                     </div>
                                     <div className="relative flex justify-center text-xs">
-                                        <span className="px-2 bg-white text-gray-400">Resources</span>
+                                        <span className="px-2 bg-white text-gray-400">Contact & Info</span>
                                     </div>
                                 </div>
 

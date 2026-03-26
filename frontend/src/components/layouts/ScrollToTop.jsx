@@ -1,12 +1,10 @@
 // components/ui/ScrollToTop.jsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
-// This component scrolls to top on route change
 export const ScrollToTopOnRouteChange = () => {
     const { pathname } = useLocation();
 
@@ -20,17 +18,12 @@ export const ScrollToTopOnRouteChange = () => {
     return null;
 };
 
-// This component shows a floating button to scroll to top
 export const ScrollToTopButton = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         const toggleVisibility = () => {
-            if (window.pageYOffset > 300) {
-                setIsVisible(true);
-            } else {
-                setIsVisible(false);
-            }
+            setIsVisible(window.pageYOffset > 300);
         };
 
         window.addEventListener("scroll", toggleVisibility);
@@ -57,14 +50,21 @@ export const ScrollToTopButton = () => {
                     <Button
                         onClick={scrollToTop}
                         size="icon"
-                        className="relative h-10 w-10 rounded-full shadow-lg bg-gray-900 hover:bg-gray-800 text-white 
-               border-2 border-amber-400/60 hover:border-white/50 transition-all duration-300
-               overflow-hidden group cursor-pointer"
+                        className="relative shadow-lg bg-gray-900 hover:bg-gray-800 text-white 
+                                 border-2 border-amber-400/60 hover:border-white/50 transition-all duration-300
+                                 overflow-hidden group cursor-pointer"
+                        style={{
+                            width: "44px",
+                            height: "44px",
+                            borderRadius: "50%",
+                            padding: 0,
+                            minWidth: "44px",
+                            flexShrink: 0
+                        }}
                     >
-                        {/* Shine effect overlay */}
-                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out 
-                    bg-linear-to-r from-transparent via-white/30 to-transparent skew-x-12" />
-
+                        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full 
+                                      transition-transform duration-700 ease-out 
+                                      bg-linear-to-r from-transparent via-white/30 to-transparent skew-x-12" />
                         <ChevronUp className="h-5 w-5 relative z-10" />
                     </Button>
                 </motion.div>
@@ -73,7 +73,6 @@ export const ScrollToTopButton = () => {
     );
 };
 
-// Combined component that includes both functionalities
 const ScrollToTop = () => {
     return (
         <>
