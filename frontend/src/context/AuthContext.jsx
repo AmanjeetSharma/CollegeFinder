@@ -73,9 +73,9 @@ export const AuthProvider = ({ children }) => {
             });
 
             schadenToast.info(data?.message || "Verification email sent!", { // info because they need to check their email
-                duration: 10000,
+                duration: 6000,
                 position: "top-center",
-                description: "Please check your inbox to verify your account",
+                description: "Please check your inbox or spam folder",
                 icon: <IoIosMail size={20} />,
             });
 
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
             schadenToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
-                description: "Something went wrong. Please try again",
+                description: "Please try again",
             });
             throw err;
         }

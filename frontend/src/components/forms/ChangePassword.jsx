@@ -23,7 +23,8 @@ import {
     LogOut,
     ArrowLeft,
     Shield,
-    KeyRound
+    KeyRound,
+    XCircle
 } from "lucide-react";
 
 const ChangePasswordPage = () => {
@@ -39,49 +40,93 @@ const ChangePasswordPage = () => {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [passwordErrors, setPasswordErrors] = useState({});
-    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [logoutCountdown, setLogoutCountdown] = useState(5);
+    const [passwordStrength, setPasswordStrength] = useState({
+        score: 0,
+        message: ""
+    });
+
+    // Password strength checker
+    const checkPasswordStrength = (password) => {
+        let score = 0;
+        let message = "";
+
+        if (!password) {
+            return { score: 0, message: "" };
+        }
+
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+
+        if (score <= 2) message = "Very Weak";
+        else if (score <= 3) message = "Weak";
+        else if (score <= 4) message = "Medium";
+        else if (score <= 5) message = "Strong";
+        else message = "Very Strong";
+
+        return { score, message };
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Clear error for this field when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: ""
+            }));
+        }
+
+        // Check password strength for new password
+        if (name === "newPassword") {
+            setPasswordStrength(checkPasswordStrength(value));
+        }
+    };
 
     // Password validation with strict requirements
     const validatePasswordForm = () => {
-        const errors = {};
+        const newErrors = {};
 
         if (!passwordForm.currentPassword) {
-            errors.currentPassword = "Current password is required";
+            newErrors.currentPassword = "Current password is required";
         }
 
         if (!passwordForm.newPassword) {
-            errors.newPassword = "New password is required";
+            newErrors.newPassword = "Password is required";
         } else {
-            const hasMinLength = passwordForm.newPassword.length >= 8;
-            const hasUpperCase = /[A-Z]/.test(passwordForm.newPassword);
-            const hasLowerCase = /[a-z]/.test(passwordForm.newPassword);
-            const hasNumber = /[0-9]/.test(passwordForm.newPassword);
-            const hasSpecialChar = /[^A-Za-z0-9]/.test(passwordForm.newPassword);
-
-            if (!hasMinLength) {
-                errors.newPassword = "Password must be at least 8 characters";
-            } else if (!hasUpperCase) {
-                errors.newPassword = "Password must contain at least one uppercase letter";
-            } else if (!hasLowerCase) {
-                errors.newPassword = "Password must contain at least one lowercase letter";
-            } else if (!hasNumber) {
-                errors.newPassword = "Password must contain at least one number";
-            } else if (!hasSpecialChar) {
-                errors.newPassword = "Password must contain at least one special character";
+            if (passwordForm.newPassword.length < 8) {
+                newErrors.newPassword = "Password must be at least 8 characters";
+            } else if (!/[A-Z]/.test(passwordForm.newPassword)) {
+                newErrors.newPassword = "Password must contain at least one uppercase letter";
+            } else if (!/[a-z]/.test(passwordForm.newPassword)) {
+                newErrors.newPassword = "Password must contain at least one lowercase letter";
+            } else if (!/[0-9]/.test(passwordForm.newPassword)) {
+                newErrors.newPassword = "Password must contain at least one number";
+            } else if (!/[^A-Za-z0-9]/.test(passwordForm.newPassword)) {
+                newErrors.newPassword = "Password must contain at least one special character (e.g., !@#$%^&*)";
             }
         }
 
         if (!passwordForm.confirmNewPassword) {
-            errors.confirmNewPassword = "Please confirm your new password";
+            newErrors.confirmNewPassword = "Please confirm your new password";
         } else if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
-            errors.confirmNewPassword = "Passwords do not match";
+            newErrors.confirmNewPassword = "Passwords do not match";
         }
 
-        setPasswordErrors(errors);
-        return Object.keys(errors).length === 0;
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleChangePassword = async (e) => {
@@ -91,7 +136,7 @@ const ChangePasswordPage = () => {
             return;
         }
 
-        setIsChangingPassword(true);
+        setLoading(true);
 
         try {
             await changePassword({
@@ -106,7 +151,7 @@ const ChangePasswordPage = () => {
                 newPassword: "",
                 confirmNewPassword: ""
             });
-            setPasswordErrors({});
+            setErrors({});
 
             // Show success dialog
             setShowSuccessDialog(true);
@@ -114,7 +159,7 @@ const ChangePasswordPage = () => {
 
         } catch (error) {
             // Error handled in context
-            setIsChangingPassword(false);
+            setLoading(false);
         }
     };
 
@@ -147,103 +192,45 @@ const ChangePasswordPage = () => {
     }, [showSuccessDialog, clearSession, navigate]);
 
     const handleBack = () => {
-        navigate(-1);
+        navigate("/profile");
     };
 
-    // Calculate password strength with updated criteria
-    const getPasswordStrength = () => {
-        const { newPassword } = passwordForm;
-        if (!newPassword) return 0;
-
-        let strength = 0;
-
-        // Check all requirements
-        const hasMinLength = newPassword.length >= 8;
-        const hasUpperCase = /[A-Z]/.test(newPassword);
-        const hasLowerCase = /[a-z]/.test(newPassword);
-        const hasNumber = /[0-9]/.test(newPassword);
-        const hasSpecialChar = /[^A-Za-z0-9]/.test(newPassword);
-
-        // All mandatory requirements must be met
-        const allRequirementsMet = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
-
-        if (allRequirementsMet) {
-            strength = 3; // Base strength for meeting all requirements
-
-            // Extra points for longer passwords
-            if (newPassword.length >= 12) {
-                strength = 4; // Strong password
-            }
-        } else {
-            // Partial strength based on how many requirements are met
-            if (hasMinLength) strength++;
-            if (hasUpperCase) strength++;
-            if (hasLowerCase) strength++;
-            if (hasNumber) strength++;
-            if (hasSpecialChar) strength++;
-        }
-
-        return strength;
+    // Get password strength color
+    const getPasswordStrengthColor = () => {
+        if (passwordStrength.score <= 2) return "bg-red-500";
+        if (passwordStrength.score <= 3) return "bg-orange-500";
+        if (passwordStrength.score <= 4) return "bg-yellow-500";
+        if (passwordStrength.score <= 5) return "bg-blue-500";
+        return "bg-green-500";
     };
 
-    const getStrengthColor = (strength) => {
-        if (strength === 1) return "bg-red-500";
-        if (strength === 2) return "bg-orange-500";
-        if (strength === 3) return "bg-yellow-500";
-        if (strength === 4) return "bg-green-500";
-        return "bg-gray-200";
-    };
-
-    const getStrengthText = (strength) => {
-        if (strength === 1) return "Weak";
-        if (strength === 2) return "Fair";
-        if (strength === 3) return "Good";
-        if (strength === 4) return "Strong";
-        return "Very Weak";
-    };
-
-    // Check if all mandatory requirements are met
-    const areAllRequirementsMet = () => {
-        const { newPassword } = passwordForm;
-        if (!newPassword) return false;
-
-        return newPassword.length >= 8 &&
-            /[A-Z]/.test(newPassword) &&
-            /[a-z]/.test(newPassword) &&
-            /[0-9]/.test(newPassword) &&
-            /[^A-Za-z0-9]/.test(newPassword);
-    };
-
-    // Get requirement status
-    const getRequirementStatus = () => {
-        const { newPassword } = passwordForm;
-        return {
-            minLength: newPassword && newPassword.length >= 8,
-            upperCase: newPassword && /[A-Z]/.test(newPassword),
-            lowerCase: newPassword && /[a-z]/.test(newPassword),
-            number: newPassword && /[0-9]/.test(newPassword),
-            specialChar: newPassword && /[^A-Za-z0-9]/.test(newPassword),
-            minLength12: newPassword && newPassword.length >= 12
-        };
+    // Get password strength width
+    const getPasswordStrengthWidth = () => {
+        if (!passwordForm.newPassword) return "0%";
+        const percentage = (passwordStrength.score / 6) * 100;
+        return `${percentage}%`;
     };
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-between p-4 pt-16 bg-gradient-to-br from-slate-50 via-white to-slate-50 relative">
-            {/* Back to Profile Link - Top Left */}
+            {/* Back to Profile Button - Top Left */}
             <div className="absolute top-4 left-4 z-10">
-                <Link
-                    to="/profile"
+                <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleBack}
                     className="inline-flex items-center gap-2 px-3 py-2 font-semibold text-sm text-gray-900 hover:text-stone-800 transition-colors group bg-white/50 hover:bg-gray-200 rounded-lg backdrop-blur-sm"
+                    disabled={loading}
                 >
                     <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                     Back to Profile
-                </Link>
+                </Button>
             </div>
 
             <div className="w-full max-w-md flex-1 flex items-center">
-                <Card className="border shadow-2xl shadow-black/5 w-full relative overflow-hidden backdrop-blur-sm bg-white/95">
+                <Card className="border shadow-2xl shadow-black/5 w-full relative overflow-hidden">
                     {/* Premium accent line */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-900 via-indigo-600 to-gray-900" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-stone-600 to-indigo-500" />
 
                     <CardHeader className="text-center space-y-2 pt-8 pb-4">
                         <CardTitle className="text-3xl font-bold bg-gradient-to-r from-stone-800 to-stone-600 bg-clip-text text-transparent">
@@ -259,150 +246,148 @@ const ChangePasswordPage = () => {
                             {/* Current Password */}
                             <div className="space-y-2">
                                 <Label htmlFor="currentPassword" className="text-stone-700">
-                                    Current Password
+                                    Current Password <span className="text-destructive">*</span>
                                 </Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                                     <Input
                                         id="currentPassword"
+                                        name="currentPassword"
                                         type={showCurrentPassword ? "text" : "password"}
                                         placeholder="Enter current password"
                                         value={passwordForm.currentPassword}
-                                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                                        className={`pl-9 pr-9 border-stone-200 focus:border-stone-400 transition-all ${passwordErrors.currentPassword ? "border-red-500" : ""}`}
+                                        onChange={handleChange}
+                                        className={`pl-9 pr-9 ${errors.currentPassword ? "border-destructive focus-visible:ring-destructive" : "border-stone-200 focus:border-stone-400"} transition-all`}
+                                        disabled={loading}
+                                        autoComplete="current-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </button>
                                 </div>
-                                {passwordErrors.currentPassword && (
-                                    <p className="text-xs text-red-500">{passwordErrors.currentPassword}</p>
+                                {errors.currentPassword && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <XCircle className="h-3 w-3" />
+                                        {errors.currentPassword}
+                                    </p>
                                 )}
                             </div>
 
                             {/* New Password */}
                             <div className="space-y-2">
                                 <Label htmlFor="newPassword" className="text-stone-700">
-                                    New Password
+                                    New Password <span className="text-destructive">*</span>
                                 </Label>
                                 <div className="relative">
                                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                                     <Input
                                         id="newPassword"
+                                        name="newPassword"
                                         type={showNewPassword ? "text" : "password"}
                                         placeholder="Enter new password"
                                         value={passwordForm.newPassword}
-                                        onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                        className={`pl-9 pr-9 border-stone-200 focus:border-stone-400 transition-all ${passwordErrors.newPassword ? "border-red-500" : ""}`}
+                                        onChange={handleChange}
+                                        className={`pl-9 pr-9 ${errors.newPassword ? "border-destructive focus-visible:ring-destructive" : "border-stone-200 focus:border-stone-400"} transition-all`}
+                                        disabled={loading}
+                                        autoComplete="new-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowNewPassword(!showNewPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </button>
                                 </div>
-                                {passwordErrors.newPassword && (
-                                    <p className="text-xs text-red-500">{passwordErrors.newPassword}</p>
-                                )}
 
-                                {/* Password Requirements */}
+                                {/* Password Requirements and Strength Bar */}
                                 {passwordForm.newPassword && (
-                                    <div className="mt-2 space-y-1">
-                                        <p className="text-xs font-medium text-stone-600 mb-1">Password must contain:</p>
-                                        {(() => {
-                                            const reqs = getRequirementStatus();
-                                            return (
-                                                <div className="space-y-1 text-xs">
-                                                    <div className={`flex items-center gap-2 ${reqs.minLength ? "text-green-600" : "text-stone-500"}`}>
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${reqs.minLength ? "bg-green-500" : "bg-stone-300"}`} />
-                                                        <span>At least 8 characters</span>
-                                                    </div>
-                                                    <div className={`flex items-center gap-2 ${reqs.upperCase ? "text-green-600" : "text-stone-500"}`}>
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${reqs.upperCase ? "bg-green-500" : "bg-stone-300"}`} />
-                                                        <span>One uppercase letter</span>
-                                                    </div>
-                                                    <div className={`flex items-center gap-2 ${reqs.lowerCase ? "text-green-600" : "text-stone-500"}`}>
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${reqs.lowerCase ? "bg-green-500" : "bg-stone-300"}`} />
-                                                        <span>One lowercase letter</span>
-                                                    </div>
-                                                    <div className={`flex items-center gap-2 ${reqs.number ? "text-green-600" : "text-stone-500"}`}>
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${reqs.number ? "bg-green-500" : "bg-stone-300"}`} />
-                                                        <span>One number</span>
-                                                    </div>
-                                                    <div className={`flex items-center gap-2 ${reqs.specialChar ? "text-green-600" : "text-stone-500"}`}>
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${reqs.specialChar ? "bg-green-500" : "bg-stone-300"}`} />
-                                                        <span>One special character (!@#$%^&* etc.)</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
+                                    <div className="space-y-2 mt-2">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-muted-foreground">Password strength:</span>
+                                            <span className={`font-medium ${
+                                                passwordStrength.score <= 2 ? "text-red-500" :
+                                                passwordStrength.score <= 3 ? "text-orange-500" :
+                                                passwordStrength.score <= 4 ? "text-yellow-500" :
+                                                passwordStrength.score <= 5 ? "text-blue-500" :
+                                                "text-green-500"
+                                            }`}>
+                                                {passwordStrength.message}
+                                            </span>
+                                        </div>
+                                        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                                                style={{ width: getPasswordStrengthWidth() }}
+                                            />
+                                        </div>
+                                        <ul className="text-xs space-y-1 mt-2">
+                                            <li className={`flex items-center gap-1 ${passwordForm.newPassword.length >= 8 ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {passwordForm.newPassword.length >= 8 ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least 8 characters</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[A-Z]/.test(passwordForm.newPassword) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[A-Z]/.test(passwordForm.newPassword) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one uppercase letter</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[a-z]/.test(passwordForm.newPassword) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[a-z]/.test(passwordForm.newPassword) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one lowercase letter</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[0-9]/.test(passwordForm.newPassword) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[0-9]/.test(passwordForm.newPassword) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one number</span>
+                                            </li>
+                                            <li className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(passwordForm.newPassword) ? "text-green-500" : "text-muted-foreground"}`}>
+                                                {/[^A-Za-z0-9]/.test(passwordForm.newPassword) ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                                <span>At least one special character (e.g., !@#$%^&*)</span>
+                                            </li>
+                                        </ul>
                                     </div>
                                 )}
-
-                                {/* Password Strength Indicator */}
-                                {passwordForm.newPassword && (
-                                    <div className="mt-3">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <div className="text-xs text-stone-500">Password strength:</div>
-                                            <div className={`text-xs font-medium ${getPasswordStrength() === 4 ? "text-green-600" :
-                                                getPasswordStrength() === 3 ? "text-yellow-600" :
-                                                    "text-red-600"
-                                                }`}>
-                                                {getStrengthText(getPasswordStrength())}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-1">
-                                            {[1, 2, 3, 4].map((level) => (
-                                                <div
-                                                    key={level}
-                                                    className={`h-1 flex-1 rounded-full transition-all ${level <= getPasswordStrength()
-                                                        ? getStrengthColor(getPasswordStrength())
-                                                        : "bg-gray-200"
-                                                        }`}
-                                                />
-                                            ))}
-                                        </div>
-                                        {areAllRequirementsMet() && passwordForm.newPassword.length >= 12 && (
-                                            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                                                <CheckCircle2 className="h-3 w-3" />
-                                                Strong password! Good security
-                                            </p>
-                                        )}
-                                    </div>
+                                {errors.newPassword && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <XCircle className="h-3 w-3" />
+                                        {errors.newPassword}
+                                    </p>
                                 )}
                             </div>
 
                             {/* Confirm New Password */}
                             <div className="space-y-2">
                                 <Label htmlFor="confirmNewPassword" className="text-stone-700">
-                                    Confirm New Password
+                                    Confirm New Password <span className="text-destructive">*</span>
                                 </Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                                     <Input
                                         id="confirmNewPassword"
+                                        name="confirmNewPassword"
                                         type={showConfirmPassword ? "text" : "password"}
                                         placeholder="Confirm new password"
                                         value={passwordForm.confirmNewPassword}
-                                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })}
-                                        className={`pl-9 pr-9 border-stone-200 focus:border-stone-400 transition-all ${passwordErrors.confirmNewPassword ? "border-red-500" : ""}`}
+                                        onChange={handleChange}
+                                        className={`pl-9 pr-9 ${errors.confirmNewPassword ? "border-destructive focus-visible:ring-destructive" : "border-stone-200 focus:border-stone-400"} transition-all`}
+                                        disabled={loading}
+                                        autoComplete="new-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </button>
                                 </div>
-                                {passwordErrors.confirmNewPassword && (
-                                    <p className="text-xs text-red-500">{passwordErrors.confirmNewPassword}</p>
+                                {errors.confirmNewPassword && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <XCircle className="h-3 w-3" />
+                                        {errors.confirmNewPassword}
+                                    </p>
                                 )}
                                 {passwordForm.confirmNewPassword && passwordForm.newPassword === passwordForm.confirmNewPassword && passwordForm.newPassword && (
                                     <p className="text-xs text-green-600 flex items-center gap-1">
@@ -422,46 +407,35 @@ const ChangePasswordPage = () => {
                         </CardContent>
 
                         <div className="px-6 pb-8 pt-4">
-                            <div className="flex gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleBack}
-                                    className="flex-1 border-stone-200 hover:bg-stone-50"
-                                >
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={passwordLoading || isChangingPassword}
-                                    className="flex-1 bg-stone-800 hover:bg-stone-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
-                                >
-                                    {(passwordLoading || isChangingPassword) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Change Password
-                                </Button>
-                            </div>
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-stone-800 hover:bg-stone-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                            >
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {loading ? "Changing Password..." : "Change Password"}
+                            </Button>
                         </div>
                     </form>
                 </Card>
             </div>
 
             {/* Footer */}
-            <footer className="w-full py-6 text-center border-t mt-8 bg-white/50 backdrop-blur-sm">
+            <footer className="w-full py-6 text-center border-t mt-8">
                 <div className="container mx-auto px-4">
                     <p className="text-sm text-muted-foreground">
                         &copy; {new Date().getFullYear()} CollegeFinder. All rights reserved.
                     </p>
                     <div className="flex justify-center gap-4 mt-2">
-                        <Link to="/terms" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                        <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                             Terms of Service
                         </Link>
                         <span className="text-muted-foreground text-xs">•</span>
-                        <Link to="/privacy" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                        <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                             Privacy Policy
                         </Link>
                         <span className="text-muted-foreground text-xs">•</span>
-                        <Link to="/contact" className="text-xs text-muted-foreground hover:text-stone-800 transition-colors">
+                        <Link to="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                             Contact Us
                         </Link>
                     </div>

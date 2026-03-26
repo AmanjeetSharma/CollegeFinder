@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { CheckCircle, XCircle, AlertTriangle, Info } from "lucide-react";
+import { FaExclamationTriangle } from "react-icons/fa";
 
 // Toast configs
 const TOAST_CONFIG = {
@@ -18,7 +19,7 @@ const TOAST_CONFIG = {
   },
 
   error: {
-    icon: <XCircle size={18} />,
+    icon: <FaExclamationTriangle size={18} />,
     bg: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
     duration: 4000,
   },
@@ -31,7 +32,7 @@ const TOAST_CONFIG = {
 
   info: {
     icon: <Info size={18} />,
-    bg: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+    bg: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
     duration: 4000,
   },
 };

@@ -307,7 +307,7 @@ const Profile = () => {
                             <Button
                                 onClick={() => navigate('/change-password')}
                                 variant="outline"
-                                className="border-gray-300 hover:bg-gray-50"
+                                className="border-gray-300 hover:bg-gray-100 cursor-pointer"
                             >
                                 <Key className="h-4 w-4 mr-2" />
                                 Change Password
@@ -315,7 +315,7 @@ const Profile = () => {
                             <Button
                                 onClick={() => setIsEditing(!isEditing)}
                                 variant={isEditing ? "destructive" : "default"}
-                                className={!isEditing ? "bg-gray-900 hover:bg-gray-800" : ""}
+                                className={!isEditing ? "bg-gray-900 hover:bg-gray-800 cursor-pointer" : "cursor-pointer"}
                             >
                                 {isEditing ? (
                                     <>
@@ -351,7 +351,7 @@ const Profile = () => {
                                         {/* Avatar Section */}
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
                                             <Avatar className="h-16 w-16 sm:h-20 sm:w-20 mx-auto sm:mx-0">
-                                                <AvatarFallback className="bg-gradient-to-r from-gray-900 to-gray-600 text-white text-base sm:text-xl">
+                                                <AvatarFallback className="bg-linear-to-r from-gray-900 to-gray-600 text-white text-base sm:text-xl">
                                                     {getInitials(user?.name)}
                                                 </AvatarFallback>
                                             </Avatar>
@@ -420,7 +420,7 @@ const Profile = () => {
                                                 <Button
                                                     type="submit"
                                                     disabled={updatingProfile}
-                                                    className="bg-gray-900 hover:bg-gray-800 w-full sm:w-auto"
+                                                    className="bg-gray-900 hover:bg-gray-800 w-full sm:w-auto p-4 cursor-pointer"
                                                     size="sm"
                                                 >
                                                     {updatingProfile && <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}

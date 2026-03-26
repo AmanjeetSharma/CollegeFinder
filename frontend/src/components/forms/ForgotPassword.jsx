@@ -45,7 +45,7 @@ export default function ForgotPassword() {
         <div className="min-h-screen flex flex-col items-center justify-between p-4 bg-gradient-to-br from-slate-50 via-white to-slate-50">
             {/* Decorative elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-100/30 rounded-full blur-3xl" />
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-100/30 rounded-full blur-3xl" />
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-stone-100/40 rounded-full blur-3xl" />
             </div>
 
@@ -75,20 +75,20 @@ export default function ForgotPassword() {
 
                             {sent ? (
                                 <div className="text-center space-y-4 py-8">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-stone-100 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-amber-100">
-                                        <CheckCircle2 className="h-8 w-8 text-amber-600" strokeWidth={1.5} />
+                                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-stone-100 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-indigo-100">
+                                        <CheckCircle2 className="h-8 w-8 text-indigo-600" strokeWidth={1.5} />
                                     </div>
                                     <div>
                                         <p className="font-semibold text-stone-800 text-lg">Reset link sent!</p>
                                         <p className="text-sm text-muted-foreground mt-2">
                                             We've sent a password reset link to
                                         </p>
-                                        <p className="font-semibold mt-2 text-stone-800 bg-amber-50 inline-block px-3 py-1 rounded-md">
+                                        <p className="font-semibold mt-2 text-stone-800 bg-indigo-50 inline-block px-3 py-1 rounded-md">
                                             {resetEmail}
                                         </p>
-                                        <div className="mt-4 p-3 bg-gradient-to-br from-amber-50 to-stone-50 rounded-lg border border-amber-200">
+                                        <div className="mt-4 p-3 bg-gradient-to-br from-indigo-50 to-stone-50 rounded-lg border border-indigo-200">
                                             <div className="flex items-start gap-2">
-                                                <Sparkles className="h-4 w-4 text-amber-600 mt-0.5" />
+                                                <Sparkles className="h-4 w-4 text-indigo-600 mt-0.5" />
                                                 <p className="text-xs text-stone-600 text-left">
                                                     Check your inbox and spam folder. The link will expire in 10 minutes.
                                                 </p>
@@ -116,9 +116,9 @@ export default function ForgotPassword() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-amber-50 to-stone-50 rounded-lg p-3 border border-amber-200">
+                                    <div className="bg-gradient-to-br from-indigo-50 to-stone-50 rounded-lg p-3 border border-indigo-200">
                                         <div className="flex items-start gap-2">
-                                            <Shield className="h-4 w-4 text-amber-600 mt-0.5" />
+                                            <Shield className="h-4 w-4 text-indigo-600 mt-0.5" />
                                             <p className="text-xs text-stone-600">
                                                 Enter your registered email address and we'll send you a link to reset your password.
                                             </p>

@@ -70,7 +70,7 @@ export const PasswordProvider = ({ children }) => {
                 data?.message ||
                 "If this email exists, a reset link has been sent",
                 {
-                    duration: 6000,
+                    duration: 8000,
                     position: "top-center",
                     description: "Please check your inbox or spam folder",
                     icon: <IoIosMail size={20} />,
