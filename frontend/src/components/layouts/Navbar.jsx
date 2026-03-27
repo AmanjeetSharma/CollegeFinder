@@ -331,7 +331,7 @@ const Navbar = () => {
                                             {[
                                                 { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
                                                 { label: "Settings", icon: Settings, path: "/profile" },
-                                                { label: "Security", icon: Shield, path: "/sessions" },
+                                                { label: "Manage Sessions", icon: Shield, path: "/sessions" },
                                             ].map(({ label, icon: Icon, path }) => (
                                                 <Link
                                                     key={path}
@@ -404,7 +404,7 @@ const UserDropdown = memo(({ user, navigate, onLogout }) => (
             {[
                 { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
                 { label: "Profile Settings", icon: Settings, path: "/profile" },
-                { label: "Security", icon: Shield, path: "/sessions" },
+                { label: "Manage Sessions", icon: Shield, path: "/sessions" },
             ].map(({ label, icon: Icon, path }) => (
                 <DropdownMenuItem
                     key={path}

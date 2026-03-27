@@ -187,7 +187,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     }).select("+password");
 
     if (!user) {
-        throw new ApiError(400, "Invalid or expired token");
+        throw new ApiError(400, "Token is invalid or your link has expired");
     }
 
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
