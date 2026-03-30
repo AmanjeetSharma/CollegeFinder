@@ -1,21 +1,27 @@
 // routes/AppRoutes.jsx
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
+
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import PageLoader from "../utils/PageLoader";
 
-// Lazy load components
+// Helper to wrap each route with loader
+const withLoader = (Component) => (
+    <Suspense fallback={<PageLoader />}>
+        <Component />
+    </Suspense>
+);
 
-//info pages/general pages
+
+// Public pages
 const Home = lazy(() => import("../pages/public/Home"));
 const NotFound = lazy(() => import("../pages/errors/NotFound"));
 const About = lazy(() => import("../pages/public/About"));
 const Contact = lazy(() => import("../pages/public/Contact"));
 const HowItWorks = lazy(() => import("../pages/public/HowItWorks"));
 
-
-//auth related pages
+// Auth
 const Register = lazy(() => import("../components/forms/Register"));
 const Verify = lazy(() => import("../components/forms/Verify"));
 const Login = lazy(() => import("../components/forms/Login"));
@@ -23,48 +29,48 @@ const ChangePassword = lazy(() => import("../components/forms/ChangePassword"));
 const ForgotPassword = lazy(() => import("../components/forms/ForgotPassword"));
 const ResetPassword = lazy(() => import("../components/forms/ResetPassword"));
 
-//user related pages
+// User
 const Dashboard = lazy(() => import("../pages/user/Dashboard"));
 const Profile = lazy(() => import("../pages/user/Profile"));
 const Sessions = lazy(() => import("../pages/user/Sessions"));
+
+// College
 const FindCollege = lazy(() => import("../pages/college/FindCollege"));
 const CollegeDetails = lazy(() => import("../pages/college/CollegeDetails"));
 
 const AppRoutes = () => {
     return (
-        <Suspense fallback={<PageLoader />}>
-            <Routes>
+        <Routes>
 
-                {/* Public (blocked if logged in) */}
-                <Route element={<PublicRoute />}>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/verify/:token" element={<Verify />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                </Route>
+            {/* Auth Routes (blocked if logged in) */}
+            <Route element={<PublicRoute />}>
+                <Route path="/login" element={withLoader(Login)} />
+                <Route path="/register" element={withLoader(Register)} />
+                <Route path="/verify/:token" element={withLoader(Verify)} />
+                <Route path="/forgot-password" element={withLoader(ForgotPassword)} />
+                <Route path="/reset-password" element={withLoader(ResetPassword)} />
+            </Route>
 
-                {/* Open routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/colleges" element={<FindCollege />} />
-                <Route path="/colleges/:id" element={<CollegeDetails />} />
+            {/* Public routes */}
+            <Route path="/" element={withLoader(Home)} />
+            <Route path="/about" element={withLoader(About)} />
+            <Route path="/contact" element={withLoader(Contact)} />
+            <Route path="/how-it-works" element={withLoader(HowItWorks)} />
+            <Route path="/colleges" element={withLoader(FindCollege)} />
+            <Route path="/colleges/:id" element={withLoader(CollegeDetails)} />
 
-                {/* Protected */}
-                <Route element={<ProtectedRoute />}>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/sessions" element={<Sessions />} />
-                    <Route path="/change-password" element={<ChangePassword />} />
-                </Route>
+            {/* Protected */}
+            <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={withLoader(Dashboard)} />
+                <Route path="/profile" element={withLoader(Profile)} />
+                <Route path="/sessions" element={withLoader(Sessions)} />
+                <Route path="/change-password" element={withLoader(ChangePassword)} />
+            </Route>
 
-                {/* 404 */}
-                <Route path="*" element={<NotFound />} />
+            {/* 404 */}
+            <Route path="*" element={withLoader(NotFound)} />
 
-            </Routes>
-        </Suspense>
+        </Routes>
     );
 };
 

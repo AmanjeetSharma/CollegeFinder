@@ -17,6 +17,7 @@ import {
     RotateCcw,
     Sparkles
 } from "lucide-react";
+import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -96,11 +97,21 @@ const FindCollege = () => {
     });
 
     const toggleSave = (collegeId) => {
-        setSavedColleges(prev =>
-            prev.includes(collegeId)
+        setSavedColleges(prev => {
+            const isSaved = prev.includes(collegeId);
+
+            if (!isSaved) {
+                // Only show toast when adding/ saving
+                schadenToast.success("College Bookmarked", {
+                    duration: 1500,
+                    position: "top-center",
+                });
+            }
+
+            return isSaved
                 ? prev.filter(id => id !== collegeId)
-                : [...prev, collegeId]
-        );
+                : [...prev, collegeId];
+        });
     };
 
     const handleViewDetails = (collegeId) => {
@@ -329,7 +340,7 @@ const FindCollege = () => {
 
                 {loading ? (
                     <div className="flex justify-center items-center py-16">
-                        <Loader2 className="h-7 w-7 animate-spin text-blue-500" />
+                        <Loader2 className="h-7 w-7 animate-spin text-gray-700" />
                     </div>
                 ) : (
                     <>
