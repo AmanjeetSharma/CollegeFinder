@@ -28,6 +28,7 @@ const Dashboard = lazy(() => import("../pages/user/Dashboard"));
 const Profile = lazy(() => import("../pages/user/Profile"));
 const Sessions = lazy(() => import("../pages/user/Sessions"));
 const FindCollege = lazy(() => import("../pages/college/FindCollege"));
+const CollegeDetails = lazy(() => import("../pages/college/CollegeDetails"));
 
 const AppRoutes = () => {
     return (
@@ -49,6 +50,7 @@ const AppRoutes = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/colleges" element={<FindCollege />} />
+                <Route path="/colleges/:id" element={<CollegeDetails />} />
 
                 {/* Protected */}
                 <Route element={<ProtectedRoute />}>
