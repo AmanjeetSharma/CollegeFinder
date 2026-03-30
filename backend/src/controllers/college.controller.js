@@ -51,6 +51,11 @@ const getColleges = asyncHandler(async (req, res) => {
 
     const total = await College.countDocuments(filter);
 
+    const state_uts = await College.distinct("location.state"); // fetch distinct states/UTs for filter dropdown
+
+
+    console.log(`Fetcghed ${colleges.length} colleges with filter:`, filter);
+
     return res.status(200).json(
         new ApiResponse(
             200,
@@ -62,6 +67,7 @@ const getColleges = asyncHandler(async (req, res) => {
                     limit,
                     totalPages: Math.ceil(total / limit),
                 },
+                state_uts,
             },
             "Colleges fetched successfully"
         )

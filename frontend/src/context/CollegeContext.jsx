@@ -9,8 +9,7 @@ export const CollegeProvider = ({ children }) => {
     const [colleges, setColleges] = useState([]);
     const [pagination, setPagination] = useState(null);
     const [selectedCollege, setSelectedCollege] = useState(null);
-
-
+    const [stateUTs, setStateUTs] = useState([]);
 
 
 
@@ -28,6 +27,7 @@ export const CollegeProvider = ({ children }) => {
 
             setColleges(data?.data?.colleges || []);
             setPagination(data?.data?.pagination || null);
+            setStateUTs(data?.data?.state_uts || []);
 
             return true;
         } catch (err) {
@@ -220,6 +220,7 @@ export const CollegeProvider = ({ children }) => {
         loading,
         colleges,
         pagination,
+        stateUTs,
         selectedCollege,
 
         getColleges,
