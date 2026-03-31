@@ -17,6 +17,8 @@ import {
     RotateCcw,
     Sparkles
 } from "lucide-react";
+import { FaBookmark } from "react-icons/fa6";
+import { FaStar } from "react-icons/fa";
 import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,8 +27,6 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useCollege } from "../../context/CollegeContext";
-import { FaBookmark } from "react-icons/fa6";
-import { FaStar } from "react-icons/fa";
 
 const FindCollege = () => {
     const navigate = useNavigate();
