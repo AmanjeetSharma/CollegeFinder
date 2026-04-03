@@ -5,12 +5,16 @@ import {
     addCollege,
     updateCollege,
     deleteCollege,
+    getFilters,
 } from "../controllers/college.controller.js";
 
 const router = express.Router();
 
-// get all colleges with pagination and filters
+// get all colleges with pagination
 router.get("/", getColleges);
+
+// get filter options
+router.get("/filters", getFilters);
 
 // get single college by ID
 router.get("/:id", getCollegeById);

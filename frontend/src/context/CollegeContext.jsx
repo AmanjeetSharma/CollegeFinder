@@ -9,8 +9,12 @@ export const CollegeProvider = ({ children }) => {
     const [colleges, setColleges] = useState([]);
     const [pagination, setPagination] = useState(null);
     const [selectedCollege, setSelectedCollege] = useState(null);
-    const [stateUTs, setStateUTs] = useState([]);
-
+    const [filters, setFilters] = useState({
+        states: [],
+        cities: [],
+        types: [],
+        streams: [],
+    });
 
 
 
@@ -27,7 +31,6 @@ export const CollegeProvider = ({ children }) => {
 
             setColleges(data?.data?.colleges || []);
             setPagination(data?.data?.pagination || null);
-            setStateUTs(data?.data?.state_uts || []);
 
             return true;
         } catch (err) {
@@ -46,6 +49,38 @@ export const CollegeProvider = ({ children }) => {
         }
     };
 
+
+
+
+
+
+
+    const getFilters = async () => {
+        try {
+            const { data } = await axiosInstance.get("/colleges/filters");
+            const newFilters = {
+                states: data?.data?.states || [],
+                cities: data?.data?.cities || [],
+                types: data?.data?.types || [],
+                streams: data?.data?.streams || [],
+            };
+
+            setFilters(newFilters);
+
+            return true;
+        } catch (err) {
+            const msg =
+                err?.response?.data?.message ||
+                "Failed to fetch filters";
+
+            schadenToast.error(msg, {
+                duration: 2000,
+                position: "top-center",
+            });
+
+            throw err;
+        }
+    };
 
 
 
@@ -220,14 +255,15 @@ export const CollegeProvider = ({ children }) => {
         loading,
         colleges,
         pagination,
-        stateUTs,
         selectedCollege,
+        filters,
 
         getColleges,
         getCollegeById,
         addCollege,
         updateCollege,
         deleteCollege,
+        getFilters,
     };
 
     return (

@@ -31,7 +31,7 @@ import { useCollege } from "../../context/CollegeContext";
 
 const FindCollege = () => {
     const navigate = useNavigate();
-    const { loading, colleges, pagination, getColleges, stateUTs, filters: globalFilters } = useCollege();
+    const { loading, colleges, pagination, getColleges, filters, getFilters } = useCollege();
 
     // Search & Filter States
     const [searchQuery, setSearchQuery] = useState("");
@@ -64,16 +64,28 @@ const FindCollege = () => {
     const stateDropdownRef = useRef(null);
     const stateSearchInputRef = useRef(null);
 
-    // Use global filters if available, otherwise generate from cached data
-    const streams = globalFilters?.streams || [...new Set(allCollegesCache.flatMap(c => c.streams).filter(Boolean))];
-    const types = globalFilters?.types || [...new Set(allCollegesCache.map(c => c.type).filter(Boolean))];
+    // Use filters from context
+    const streams = filters?.streams || [];
+    const types = filters?.types || [];
+    const states = filters?.states || [];
 
-    const filteredStates = stateUTs.filter(state =>
+    const filteredStates = states.filter(state =>
         state.toLowerCase().includes(stateSearchQuery.toLowerCase())
     );
 
     const hasActiveFilters = selectedState || selectedStream || selectedType ||
-        cutoffRange[0] > 0 || cutoffRange[1] < 100;
+        cutoffRange[0] > 0 || cutoffRange[1] < 100 || searchQuery;
+
+    // Fetch filters on component mount
+    useEffect(() => {
+        const fetchFilters = async () => {
+            if (filters?.states?.length === 0 && filters?.streams?.length === 0) {
+                await getFilters();
+            }
+        };
+
+        fetchFilters();
+    }, []); // Empty dependency array - runs once on mount
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -144,13 +156,15 @@ const FindCollege = () => {
 
     // Handle Search button click
     const handleSearch = () => {
+        if (!searchQuery.trim()) return;
+
         const filters = {
             ...(selectedState && { state: selectedState }),
             ...(selectedStream && { stream: selectedStream }),
             ...(selectedType && { type: selectedType }),
             ...(cutoffRange[0] > 0 && { minCutoff: cutoffRange[0] }),
             ...(cutoffRange[1] < 100 && { maxCutoff: cutoffRange[1] }),
-            ...(searchQuery && { search: searchQuery }),
+            search: searchQuery.trim(),
         };
 
         setAppliedFilters(filters);
@@ -203,7 +217,6 @@ const FindCollege = () => {
     }, []); // Empty dependency array - runs once on mount
 
     // API call only on: appliedFilters change OR pagination change
-    // Removed isInitialLoad from dependencies to prevent second trigger
     useEffect(() => {
         // Skip if it's initial load (already handled above)
         if (isInitialLoad) return;
@@ -251,7 +264,7 @@ const FindCollege = () => {
         if (page >= 1 && page <= (pagination?.totalPages || 1)) {
             setCurrentPage(page);
             setPageInput("");
-            isFilterOrPageChangeRef.current = true; // Mark as intentional page change
+            isFilterOrPageChangeRef.current = true;
         }
     };
 
@@ -261,7 +274,7 @@ const FindCollege = () => {
         if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= (pagination?.totalPages || 1)) {
             setCurrentPage(pageNum);
             setPageInput("");
-            isFilterOrPageChangeRef.current = true; // Mark as intentional page change
+            isFilterOrPageChangeRef.current = true;
         }
     };
 
@@ -321,14 +334,16 @@ const FindCollege = () => {
                                     placeholder="Search by name or location..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                    onKeyPress={(e) => e.key === 'Enter' && searchQuery.trim() && handleSearch()}
                                     className="pl-9 py-2 h-10 bg-white text-gray-900 rounded-lg text-sm"
                                 />
                             </div>
                             <Button
                                 onClick={handleSearch}
                                 size="sm"
-                                className="bg-white/20 hover:bg-white/30 text-white border border-white/30 h-10 px-4"
+                                disabled={!searchQuery.trim()}
+                                className={`bg-white/20 hover:bg-white/30 text-white border border-white/30 h-10 px-4 ${!searchQuery.trim() ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 <Search className="h-4 w-4 sm:mr-1.5" />
                                 <span className="hidden sm:inline text-sm">Search</span>

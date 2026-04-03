@@ -62,7 +62,7 @@ const getColleges = asyncHandler(async (req, res) => {
     }
 
     // Executing queries in parallel for better performance
-    const [colleges, total, state_uts] = await Promise.all([
+    const [colleges, total] = await Promise.all([
         College.find(filter)
             .select("name location type streams cutoff")
             .skip(skip)
@@ -72,7 +72,6 @@ const getColleges = asyncHandler(async (req, res) => {
 
         College.countDocuments(filter),
 
-        College.distinct("location.state"),
     ]);
 
     console.log(`Fetched ${colleges.length} colleges with filter:`, filter);
@@ -88,12 +87,46 @@ const getColleges = asyncHandler(async (req, res) => {
                     limit,
                     totalPages: Math.ceil(total / limit),
                 },
-                state_uts,
             },
             "Colleges fetched successfully"
         )
     );
 });
+
+
+
+
+
+
+
+
+
+const getFilters = asyncHandler(async (req, res) => {
+    const [states, cities, types, streams] = await Promise.all([
+        College.distinct("location.state"),
+        College.distinct("location.city"),
+        College.distinct("type"),
+        College.distinct("streams"),
+    ]);
+
+    console.log(`Filter option fetched | States: ${states.length}, Cities: ${cities.length}, Types: ${types.length}, Streams: ${streams.length}`);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                states: states.sort(),
+                cities: cities.sort(),
+                types: types.sort(),
+                streams: streams.sort(),
+            },
+            "Filter options fetched successfully"
+        )
+    );
+});
+
+
+
 
 
 
@@ -220,4 +253,5 @@ export {
     addCollege,
     updateCollege,
     deleteCollege,
+    getFilters,
 }
