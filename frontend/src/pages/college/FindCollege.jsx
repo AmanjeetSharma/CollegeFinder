@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useCollege } from "../../context/CollegeContext";
+import Footer from "./Footer";
 
 const FindCollege = () => {
     const navigate = useNavigate();
@@ -772,6 +773,7 @@ const FindCollege = () => {
                     </>
                 )}
             </div>
+            <Footer />
         </div>
     );
 };

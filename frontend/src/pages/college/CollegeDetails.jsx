@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCollege } from "../../context/CollegeContext";
 import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
+import Footer from "./Footer";
 
 /* ── Random hero pool — new image every page visit ── */
 const HERO_IMAGES = [
@@ -154,16 +155,6 @@ const CollegeDetails = () => {
                             </div>
                         </div>
                     )}
-
-                    {/* College ID Badge */}
-                    <div className="bg-black/60 backdrop-blur-sm border border-white/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300" />
-                            <span className="text-[10px] sm:text-xs font-mono font-semibold text-white">
-                                College ID: {c.collegeId}
-                            </span>
-                        </div>
-                    </div>
                 </div>
 
                 <motion.div
@@ -451,6 +442,7 @@ const CollegeDetails = () => {
                     </motion.div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };
