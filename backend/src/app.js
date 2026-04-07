@@ -21,17 +21,21 @@ app.use(cookieParser());
 // });
 
 // Import routes
+
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import collegeRoutes from "./routes/college.routes.js";
+import testRoutes from "./routes/test.routes.js";
 
 
 // Use routes
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/password", passwordRoutes);
 app.use("/api/v1/colleges", collegeRoutes);
+app.use("/api/v1/test", testRoutes);
 
 
 // Error handling middleware
