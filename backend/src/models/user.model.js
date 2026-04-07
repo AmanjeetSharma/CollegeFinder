@@ -60,6 +60,19 @@ const userSchema = new Schema(
 
     sessions: [sessionSchema],
     address: addressSchema,
+
+        class:{
+      type: String,
+      enum: ["9th", "10th", "11th", "12th"],
+
+    },
+
+    score:{
+      type:mongoose.Schema.Types.Mixed, // Can store scores for different subjects as an object
+      default: {}
+    }
+
+    
   }
 );
 

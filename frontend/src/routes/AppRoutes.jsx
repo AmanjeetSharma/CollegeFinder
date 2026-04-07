@@ -33,6 +33,7 @@ const ResetPassword = lazy(() => import("../components/forms/ResetPassword"));
 const Dashboard = lazy(() => import("../pages/user/Dashboard"));
 const Profile = lazy(() => import("../pages/user/Profile"));
 const Sessions = lazy(() => import("../pages/user/Sessions"));
+const AllTests = lazy(() => import("../pages/user/AllTests"));
 
 // College
 const FindCollege = lazy(() => import("../pages/college/FindCollege"));
@@ -65,6 +66,8 @@ const AppRoutes = () => {
                 <Route path="/profile" element={withLoader(Profile)} />
                 <Route path="/sessions" element={withLoader(Sessions)} />
                 <Route path="/change-password" element={withLoader(ChangePassword)} />
+                <Route path="/take-test" element={withLoader(lazy(() => import("../pages/user/TakeTest")))} />
+                <Route path="/all-tests" element={withLoader(AllTests)} />
             </Route>
 
             {/* 404 */}

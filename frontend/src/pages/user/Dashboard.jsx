@@ -1,6 +1,12 @@
 // pages/Dashboard.jsx
 import { useState, useEffect } from "react";
+import AllTests from "./AllTests";
+import TakeTestButton from "../../components/test/TakeTestButton";
+import TestSetupForm from "../../components/test/TestSetupForm";
+import TestLoader from "../../components/test/TestLoader";
+import { axiosInstance } from "../../lib/http";
 import { motion, AnimatePresence } from "framer-motion";
+import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,20 +45,43 @@ const Dashboard = () => {
         careerMatches: 3
     });
 
-    const [recentActivities, setRecentActivities] = useState([
-        { id: 1, title: "Completed Aptitude Test", date: "2024-03-20", type: "test", score: "85%" },
-        { id: 2, title: "New Career Recommendation", date: "2024-03-19", type: "career", match: "Data Science" },
-        { id: 3, title: "Scholarship Deadline", date: "2024-03-25", type: "deadline", name: "National Merit Scholarship" },
-        { id: 4, title: "Course Progress", date: "2024-03-18", type: "course", progress: "60%" }
-    ]);
+    const [recentTests, setRecentTests] = useState([]);
+    // Fetch recent tests for activity
+    useEffect(() => {
+        if (!user?._id) return;
+        axiosInstance.get(`/test/user/${user._id}/recent?limit=3`)
+            .then(res => {
+                setRecentTests(res.data.tests);
+            });
+    }, [user]);
 
-    const [aptitudeData, setAptitudeData] = useState([
-        { subject: "Mathematics", score: 85 },
-        { subject: "Science", score: 78 },
-        { subject: "English", score: 92 },
-        { subject: "Logical Reasoning", score: 70 },
-        { subject: "General Knowledge", score: 88 }
-    ]);
+    // Fetch all tests and compute aptitude data
+    const [aptitudeData, setAptitudeData] = useState([]);
+    useEffect(() => {
+        if (!user?._id) return;
+        axiosInstance.get(`/test/user/${user._id}`)
+            .then(res => {
+                const tests = res.data.tests;
+                // Aggregate section scores
+                const sectionScores = {};
+                const sectionCounts = {};
+                tests.forEach(test => {
+                    test.sections.forEach(section => {
+                        if (!sectionScores[section.sectionName]) {
+                            sectionScores[section.sectionName] = 0;
+                            sectionCounts[section.sectionName] = 0;
+                        }
+                        sectionScores[section.sectionName] += section.sectionScore;
+                        sectionCounts[section.sectionName] += 1;
+                    });
+                });
+                const data = Object.keys(sectionScores).map(subject => ({
+                    subject,
+                    score: Math.round(sectionScores[subject] / sectionCounts[subject])
+                }));
+                setAptitudeData(data);
+            });
+    }, [user]);
 
     const careerPaths = [
         { name: "Data Science", match: 92, color: "#3B82F6", requirements: ["Mathematics", "Programming"] },
@@ -87,6 +116,11 @@ const Dashboard = () => {
 
     const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
+    // Modal state for test setup
+    const [showTestSetup, setShowTestSetup] = useState(false);
+    const [loadingTest, setLoadingTest] = useState(false);
+    const [testData, setTestData] = useState(null);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -111,7 +145,33 @@ const Dashboard = () => {
                             <GraduationCap className="h-4 w-4 mr-2" />
                             View Profile
                         </Button>
+                        <TakeTestButton onClick={() => setShowTestSetup(true)} />
                     </div>
+                    <TestSetupForm
+                        open={showTestSetup}
+                        onClose={() => setShowTestSetup(false)}
+                        onSubmit={async ({ studentClass, interests }) => {
+                            setShowTestSetup(false);
+                            setLoadingTest(true);
+                            try {
+                                const res = await axiosInstance.post("/test/build", {
+                                    studentClass,
+                                    interest: interests
+                                });
+                                setTestData(res.data.questions);
+                                navigate("/take-test", { state: { test: res.data.questions } });
+                            } catch (err) {
+                                const msg = err?.response?.data?.message ||
+                                    "Failed to generate test. Please try again later.";
+                                schadenToast.error(msg, {
+                                    description: "The AI service may be busy. Please try again in a few moments.",
+                                });
+                            } finally {
+                                setLoadingTest(false);
+                            }
+                        }}
+                    />
+                    <TestLoader open={loadingTest} />
                 </motion.div>
 
                 {/* Stats Grid */}
@@ -254,7 +314,7 @@ const Dashboard = () => {
                         </Card>
                     </motion.div>
 
-                    {/* Recent Activity */}
+                    {/* Recent Tests Activity */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -265,32 +325,31 @@ const Dashboard = () => {
                             <CardHeader>
                                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
                                     <Clock className="h-5 w-5 text-gray-500" />
-                                    Recent Activity
+                                    Recent Tests
                                 </CardTitle>
-                                <CardDescription>Your latest achievements and updates</CardDescription>
+                                <CardDescription>Your latest test attempts</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {recentActivities.map((activity, index) => (
+                                    {recentTests.length === 0 && <div className="text-gray-500">No recent tests.</div>}
+                                    {recentTests.map((test, idx) => (
                                         <motion.div
-                                            key={activity.id}
+                                            key={test._id}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.4 + index * 0.1 }}
+                                            transition={{ delay: 0.4 + idx * 0.1 }}
                                             className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                    {getActivityIcon(activity.type)}
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900">{activity.title}</p>
-                                                    <p className="text-sm text-gray-500">{activity.date}</p>
-                                                </div>
+                                            <div>
+                                                <div className="font-medium text-gray-900">Test {idx + 1}</div>
+                                                <div className="text-sm text-gray-500">{new Date(test.createdAt).toLocaleString()}</div>
                                             </div>
-                                            <ChevronRight className="h-5 w-5 text-gray-400" />
+                                            <div className="text-lg font-bold">{test.totalScore}%</div>
                                         </motion.div>
                                     ))}
+                                    <Button variant="outline" className="mt-2 w-full" onClick={() => navigate('/all-tests')}>
+                                        See all activity
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
