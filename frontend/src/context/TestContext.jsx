@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "../components/schadenToast/ToastConfig.jsx";
+import { shadcnToast } from "../components/shadcnToast/ToastConfig.jsx";
 
 const TestContext = createContext(null);
 
@@ -17,7 +17,7 @@ export const TestProvider = ({ children }) => {
                 interest,
             });
 
-            schadenToast.success(
+            shadcnToast.success(
                 data?.message || "Test generated successfully",
                 {
                     duration: 4000,
@@ -30,7 +30,7 @@ export const TestProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message || "Failed to generate test";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -53,7 +53,7 @@ export const TestProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message || "Failed to fetch running test";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -74,7 +74,7 @@ export const TestProvider = ({ children }) => {
                 answers,
             });
 
-            schadenToast.success(
+            shadcnToast.success(
                 data?.message || "Test submitted successfully",
                 {
                     duration: 4000,
@@ -87,7 +87,7 @@ export const TestProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message || "Failed to submit test";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -110,7 +110,7 @@ export const TestProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message || "Failed to fetch test history";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -133,7 +133,7 @@ export const TestProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message || "Failed to fetch test";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });

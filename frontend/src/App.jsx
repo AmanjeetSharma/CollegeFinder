@@ -33,7 +33,7 @@ function App() {
                                     expand={false}
                                     visibleToasts={3}
                                     toastOptions={{
-                                        className: "schaden-toast",
+                                        className: "shadcn-toast",
                                         duration: 4000,
                                     }}
                                 />

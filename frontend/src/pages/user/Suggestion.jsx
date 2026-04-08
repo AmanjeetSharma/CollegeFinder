@@ -21,7 +21,7 @@ import {
     TrendingUp,
     LayoutDashboard
 } from "lucide-react";
-import { schadenToast } from "@/components/schadenToast/ToastConfig";
+import { shadcnToast } from "@/components/shadcnToast/ToastConfig";
 
 const Suggestion = () => {
     const { testId } = useParams();
@@ -70,7 +70,7 @@ const Suggestion = () => {
 
     const handleSubmit = async () => {
         if (!selectedState) {
-            schadenToast.error("Please select a state");
+            shadcnToast.error("Please select a state");
             return;
         }
         setLoading(true);
@@ -78,7 +78,7 @@ const Suggestion = () => {
             const res = await getCollegeSuggestion({ testId, state: selectedState });
             setSuggestionData(res);
         } catch (err) {
-            schadenToast.error("Failed to fetch suggestions");
+            shadcnToast.error("Failed to fetch suggestions");
         } finally {
             setLoading(false);
         }

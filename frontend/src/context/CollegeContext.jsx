@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "../components/schadenToast/ToastConfig.jsx";
+import { shadcnToast } from "../components/shadcnToast/ToastConfig.jsx";
 
 const CollegeContext = createContext(null);
 
@@ -38,7 +38,7 @@ export const CollegeProvider = ({ children }) => {
                 err?.response?.data?.message ||
                 "Failed to fetch colleges";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -73,7 +73,7 @@ export const CollegeProvider = ({ children }) => {
                 err?.response?.data?.message ||
                 "Failed to fetch filters";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 2000,
                 position: "top-center",
             });
@@ -104,7 +104,7 @@ export const CollegeProvider = ({ children }) => {
                 err?.response?.data?.message ||
                 "Failed to fetch college";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -133,7 +133,7 @@ export const CollegeProvider = ({ children }) => {
                 collegeData
             );
 
-            schadenToast.success(
+            shadcnToast.success(
                 data?.message || "College added successfully",
                 {
                     duration: 4000,
@@ -147,7 +147,7 @@ export const CollegeProvider = ({ children }) => {
                 err?.response?.data?.message ||
                 "Failed to add college";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -176,7 +176,7 @@ export const CollegeProvider = ({ children }) => {
                 updateData
             );
 
-            schadenToast.success(
+            shadcnToast.success(
                 data?.message || "College updated successfully",
                 {
                     duration: 4000,
@@ -190,7 +190,7 @@ export const CollegeProvider = ({ children }) => {
                 err?.response?.data?.message ||
                 "Failed to update college";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -218,7 +218,7 @@ export const CollegeProvider = ({ children }) => {
                 `/colleges/${id}`
             );
 
-            schadenToast.success(
+            shadcnToast.success(
                 data?.message || "College deleted successfully",
                 {
                     duration: 4000,
@@ -232,7 +232,7 @@ export const CollegeProvider = ({ children }) => {
                 err?.response?.data?.message ||
                 "Failed to delete college";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });
@@ -265,7 +265,7 @@ export const CollegeProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message || "Failed to fetch college suggestions";
 
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });

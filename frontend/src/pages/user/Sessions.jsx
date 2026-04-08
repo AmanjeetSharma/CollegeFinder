@@ -17,7 +17,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { schadenToast } from "@/components/schadenToast/ToastConfig";
+import { shadcnToast } from "@/components/shadcnToast/ToastConfig";
 import {
     Monitor,
     Smartphone,
@@ -65,9 +65,9 @@ const Sessions = () => {
         setRefreshing(true);
         try {
             await loadSessions();
-            schadenToast.success("Sessions refreshed");
+            shadcnToast.success("Sessions refreshed");
         } catch (error) {
-            schadenToast.error("Failed to refresh sessions");
+            shadcnToast.error("Failed to refresh sessions");
         } finally {
             setRefreshing(false);
         }

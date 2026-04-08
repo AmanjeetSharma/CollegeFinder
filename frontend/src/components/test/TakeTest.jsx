@@ -20,7 +20,7 @@ import {
 
 import TestTimer from "./TestTimer";
 import useFullScreen from "./useFullscreen";
-import { schadenToast } from "@/components/schadenToast/ToastConfig";
+import { shadcnToast } from "@/components/shadcnToast/ToastConfig";
 
 const TakeTest = () => {
     const navigate = useNavigate();
@@ -40,7 +40,7 @@ const TakeTest = () => {
                 const t = await getRunningTest();
 
                 if (!t || t.status !== "in-progress") {
-                    schadenToast.error("No active test found");
+                    shadcnToast.error("No active test found");
                     navigate("/dashboard");
                     return;
                 }
@@ -65,7 +65,7 @@ const TakeTest = () => {
     useEffect(() => {
         const handleFullScreenExit = () => {
             if (!document.fullscreenElement) {
-                schadenToast.warning("Fullscreen is required!", {
+                shadcnToast.warning("Fullscreen is required!", {
                     description: "Re-entering fullscreen...",
                     duration: 3000
                 });
@@ -108,7 +108,7 @@ const TakeTest = () => {
     };
 
     const handleTimeUp = async () => {
-        schadenToast.warning("Time up! Auto submitting...");
+        shadcnToast.warning("Time up! Auto submitting...");
         await handleSubmit(true);
     };
 

@@ -21,7 +21,7 @@ import {
     Search
 } from "lucide-react";
 import { useTest } from "../../context/TestContext";
-import TestLoader from "../../components/test/TestLoader";
+import TestLoader from "../../components/test/testLoader/TestLoader";
 
 const classOptions = [
     { value: "10", label: "Class 10", icon: <BookOpen className="w-4 h-4" /> },

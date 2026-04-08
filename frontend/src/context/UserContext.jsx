@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
+import { shadcnToast } from "@/components/shadcnToast/ToastConfig.jsx";
 
 const UserContext = createContext(null);
 
@@ -31,7 +31,7 @@ export const UserProvider = ({ children }) => {
 
             await fetchProfile();
 
-            schadenToast.success(data?.message || "Profile updated successfully", {
+            shadcnToast.success(data?.message || "Profile updated successfully", {
                 duration: 3000,
                 position: "top-center",
                 description: "Your information has been saved",
@@ -42,7 +42,7 @@ export const UserProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Failed to update profile";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please check your information and try again",
@@ -78,7 +78,7 @@ export const UserProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Failed to fetch sessions";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please refresh the page and try again",
@@ -102,7 +102,7 @@ export const UserProvider = ({ children }) => {
         try {
             const { data } = await axiosInstance.post(`/user/sessions/logout/${sessionId}`);
 
-            schadenToast.success(data?.message || "Session terminated successfully", {
+            shadcnToast.success(data?.message || "Session terminated successfully", {
                 duration: 3000,
                 position: "top-center",
                 description: "The device has been logged out",
@@ -113,7 +113,7 @@ export const UserProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Failed to terminate session";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please try again or refresh the page",
@@ -133,7 +133,7 @@ export const UserProvider = ({ children }) => {
     // LOGOUT ALL OTHER SESSIONS
    const logoutAllOtherSessions = async () => {
     try {
-        schadenToast.info("Terminating other sessions...", {
+        shadcnToast.info("Terminating other sessions...", {
             position: "top-center",
         });
 
@@ -143,14 +143,14 @@ export const UserProvider = ({ children }) => {
 
         await getUserSessions();
 
-        schadenToast.success(data?.message || "All other sessions terminated", {
+        shadcnToast.success(data?.message || "All other sessions terminated", {
             description: "Your account is now only active on this device",
             position: "top-center",
             duration: 4000,
         });
 
     } catch (err) {
-        schadenToast.error(
+        shadcnToast.error(
             err?.response?.data?.message || "Failed to terminate sessions",
             {
                 description: "Please try again or contact support",

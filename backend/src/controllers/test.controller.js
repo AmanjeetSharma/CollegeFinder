@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Result } from "../models/result.model.js";
+import { set } from "mongoose";
 
 
 
@@ -15,21 +16,33 @@ import { Result } from "../models/result.model.js";
 
 
 
-export const generateTest = asyncHandler(async (req, res) => {
+const generateTest = asyncHandler(async (req, res) => {
   const { studentClass, interest } = req.body;
 
   if (!studentClass || !interest || (Array.isArray(interest) && interest.length === 0)) {
     throw new ApiError(400, "studentClass and at least one interest are required");
   }
 
-  // 🔥 Generate test from Gemini
+  const existingTest = await Test.findOne({
+    userId: req.user._id,
+    status: "in-progress"
+  });
+
+  if (existingTest) {
+    throw new ApiError(400, "You already have a test in progress. Please submit or wait for it to expire before generating a new one.");
+  }
+
+
+  // await new Promise(r => setTimeout(r, 10000));
+  // return;// temporary to avoid hitting gemini limits during development
+
+  // generating test using gemini
   const aiResponse = await generateFinanceQuery({ studentClass, interest });
 
   if (!aiResponse?.sections || aiResponse.sections.length === 0) {
     throw new ApiError(500, "Failed to generate test from AI");
   }
 
-  // 🔥 Map AI response → DB structure
   const sections = aiResponse.sections.map(section => ({
     sectionName: section.section_name,
     questions: section.questions.map(q => ({
@@ -41,7 +54,6 @@ export const generateTest = asyncHandler(async (req, res) => {
     }))
   }));
 
-  // 🔥 Save test in DB
   const test = await Test.create({
     userId: req.user._id,
     userEmail: req.user.email,
@@ -50,6 +62,8 @@ export const generateTest = asyncHandler(async (req, res) => {
     startedAt: new Date(),
     timeRemaining: 3600 // 1 hour in seconds
   });
+
+  console.log("Test generated with ID:", test._id);
 
   return res.status(201).json(
     new ApiResponse(201, test, "Test generated successfully")
@@ -69,21 +83,20 @@ export const generateTest = asyncHandler(async (req, res) => {
 
 
 
-export const submitTest = asyncHandler(async (req, res) => {
+const submitTest = asyncHandler(async (req, res) => {
   const { testId, answers } = req.body;
 
   if (!testId || !Array.isArray(answers)) {
     throw new ApiError(400, "testId and answers are required");
   }
 
-  // 🔥 Fetch test
   const test = await Test.findById(testId);
 
   if (!test) {
     throw new ApiError(404, "Test not found");
   }
 
-  // 🔥 Prevent double submit
+  // to prevent cheating, only allow submission if test is in-progress
   if (test.status === "submitted") {
     throw new ApiError(400, "Test already submitted");
   }
@@ -99,7 +112,6 @@ export const submitTest = asyncHandler(async (req, res) => {
     technical: 0
   };
 
-  // 🔥 Update answers + calculate score
   test.sections.forEach(section => {
     const submittedSection = answers.find(
       s => s.sectionName === section.sectionName
@@ -132,7 +144,6 @@ export const submitTest = asyncHandler(async (req, res) => {
         ? Math.round((sectionCorrect / section.questions.length) * 100)
         : 0;
 
-    // 🔥 Map section names → result keys
     const key = section.sectionName.toLowerCase();
 
     if (key.includes("quant")) sectionScores.quantitative = sectionScore;
@@ -147,13 +158,12 @@ export const submitTest = asyncHandler(async (req, res) => {
       ? Math.round((totalCorrect / totalQuestions) * 100)
       : 0;
 
-  // 🔥 Update test status
+  // updating test status and answers
   test.status = "submitted";
   test.submittedAt = new Date();
 
   await test.save();
 
-  // 🔥 Save result
   const result = await Result.create({
     userId: test.userId,
     testId: test._id,
@@ -162,6 +172,8 @@ export const submitTest = asyncHandler(async (req, res) => {
       aggregate
     }
   });
+
+  console.log("Test submitted with ID:", test._id, "Result created with ID:", result._id);
 
   return res.status(200).json(
     new ApiResponse(
@@ -186,7 +198,7 @@ export const submitTest = asyncHandler(async (req, res) => {
 
 
 
-export const getRunningTest = asyncHandler(async (req, res) => {
+const getRunningTest = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const test = await Test.findOne({
@@ -199,6 +211,8 @@ export const getRunningTest = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, null, "No running test found"));
   }
+
+  console.log("On-going test fetched for user:", userId, "Test ID:", test._id);
 
   return res
     .status(200)
@@ -213,7 +227,7 @@ export const getRunningTest = asyncHandler(async (req, res) => {
 
 
 
-export const getTestById = asyncHandler(async (req, res) => {
+const getTestById = asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   if (!testId) {
@@ -230,7 +244,7 @@ export const getTestById = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Unauthorized access");
   }
 
-  // ❌ Block if still running
+  // Block if still running
   if (test.status === "in-progress") {
     throw new ApiError(400, "Test is still in progress");
   }
@@ -259,7 +273,7 @@ export const getTestById = asyncHandler(async (req, res) => {
 
 
 
-export const getUserAllTests = asyncHandler(async (req, res) => {
+const getUserAllTests = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const tests = await Test.find({ userId })
@@ -296,3 +310,10 @@ export const getUserAllTests = asyncHandler(async (req, res) => {
 
 
 
+export {
+  generateTest,
+  submitTest,
+  getRunningTest,
+  getTestById,
+  getUserAllTests
+}

@@ -7,7 +7,7 @@ import {
 } from "react";
 import { IoIosMail } from "react-icons/io";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
+import { shadcnToast } from "@/components/shadcnToast/ToastConfig.jsx";
 
 const AuthContext = createContext(null);
 
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
 
-            schadenToast.info(data?.message || "Verification email sent!", { // info because they need to check their email
+            shadcnToast.info(data?.message || "Verification email sent!", { // info because they need to check their email
                 duration: 6000,
                 position: "top-center",
                 description: "Please check your inbox or spam folder",
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Registration failed. Try again.";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please try again",
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
                 `/auth/verify/${token}`
             );
 
-            schadenToast.success(data?.message || "Email verified successfully!", {
+            shadcnToast.success(data?.message || "Email verified successfully!", {
                 duration: 5000,
                 position: "top-center",
                 description: "You can now login to your account",
@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Verification failed";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please request a new verification link",
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }) => {
             setUser(userData);
             localStorage.setItem("backendReady", "true");
 
-            schadenToast.success(data?.message || "Welcome back!", {
+            shadcnToast.success(data?.message || "Welcome back!", {
                 duration: 3000,
                 position: "top-center",
                 description: `Logged in as ${userData.name || email}`,
@@ -164,7 +164,7 @@ export const AuthProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Invalid email or password";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please check your credentials and try again",
@@ -187,12 +187,12 @@ export const AuthProvider = ({ children }) => {
             if (res.data?.success) {
                 clearSession(); // Clear session only on successful logout
             }
-            schadenToast.success(res.data?.message || "Logged out successfully", {
+            shadcnToast.success(res.data?.message || "Logged out successfully", {
                 duration: 2000,
                 position: "top-center",
             });
         } catch (err) {
-            schadenToast.error(res?.data?.message || "Logout failed", {
+            shadcnToast.error(res?.data?.message || "Logout failed", {
                 duration: 4000,
                 position: "top-center",
             });
@@ -213,7 +213,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const { data } = await axiosInstance.post("/auth/logout-all");
 
-            schadenToast.success(data?.message || "Logged out from all other devices", {
+            shadcnToast.success(data?.message || "Logged out from all other devices", {
                 duration: 4000,
                 position: "top-center",
                 description: "current session remains active",
@@ -225,13 +225,13 @@ export const AuthProvider = ({ children }) => {
                 "Failed to logout from other devices";
 
             if (msg === "No other active sessions found") {
-                schadenToast.warning(msg, {
+                shadcnToast.warning(msg, {
                     duration: 6000,
                     position: "top-center",
                 });
                 return; //exit early since this is not really an error
             }   
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please try again or contact support",

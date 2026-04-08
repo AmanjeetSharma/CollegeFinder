@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCollege } from "../../context/CollegeContext";
-import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
+import { shadcnToast } from "@/components/shadcnToast/ToastConfig.jsx";
 import Footer from "./Footer";
 
 /* ── Random hero pool — new image every page visit ── */
@@ -107,12 +107,12 @@ const CollegeDetails = () => {
                             onClick={() => {
                                 setIsSaved(!isSaved);
                                 if (!isSaved) {
-                                    schadenToast.success("College Bookmarked", {
+                                    shadcnToast.success("College Bookmarked", {
                                         duration: 1500,
                                         position: "top-center",
                                     });
                                 } else {
-                                    schadenToast.success("Bookmark Removed", {
+                                    shadcnToast.success("Bookmark Removed", {
                                         duration: 1500,
                                         position: "top-center",
                                     });

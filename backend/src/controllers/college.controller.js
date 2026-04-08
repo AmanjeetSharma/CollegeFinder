@@ -256,7 +256,6 @@ const getCollegeSuggestion = asyncHandler(async (req, res) => {
         throw new ApiError(400, "testId and state are required");
     }
 
-    // 🔥 Get result from DB
     const result = await Result.findOne({ testId });
 
     if (!result) {
@@ -265,7 +264,6 @@ const getCollegeSuggestion = asyncHandler(async (req, res) => {
 
     const scores = result.scores;
 
-    // 🔥 Prepare payload for external API
     const payload = {
         quantitative_score: scores.quantitative || 0,
         logical_score: scores.logical || 0,
@@ -276,10 +274,10 @@ const getCollegeSuggestion = asyncHandler(async (req, res) => {
 
         state,
         prefers_government_college: true,
-        top_n: 5 // top N suggestions
+        top_n: 5 // top n suggestions
     };
 
-    // 🔥 Call external API
+    // Calling trained-model (external API)
     let response;
     try {
         response = await axios.post(

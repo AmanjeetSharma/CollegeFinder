@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { axiosInstance } from "../lib/http";
-import { schadenToast } from "../components/schadenToast/ToastConfig.jsx";
+import { shadcnToast } from "../components/shadcnToast/ToastConfig.jsx";
 import { IoIosMail } from "react-icons/io";
 
 const PasswordContext = createContext(null);
@@ -25,7 +25,7 @@ export const PasswordProvider = ({ children }) => {
                 currentPassword, newPassword, confirmNewPassword,
             });
 
-            schadenToast.success(
+            shadcnToast.success(
                 data?.message ||
                 "Password changed successfully. Please login again.",
                 {
@@ -40,7 +40,7 @@ export const PasswordProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Failed to change password";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please check your current password and try again",
@@ -66,7 +66,7 @@ export const PasswordProvider = ({ children }) => {
         try {
             const { data } = await axiosInstance.post("/password/forgot-password", { email });
 
-            schadenToast.info(  // Using info toast since we don't want to imply success if the email doesn't exist
+            shadcnToast.info(  // Using info toast since we don't want to imply success if the email doesn't exist
                 data?.message ||
                 "If this email exists, a reset link has been sent",
                 {
@@ -82,7 +82,7 @@ export const PasswordProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Something went wrong";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
                 description: "Please try again or contact support",
@@ -110,7 +110,7 @@ export const PasswordProvider = ({ children }) => {
                 token, newPassword, confirmNewPassword,
             });
 
-            schadenToast.success(
+            shadcnToast.success(
                 data?.message ||
                 "Password reset successful. Please login.",
                 {
@@ -125,7 +125,7 @@ export const PasswordProvider = ({ children }) => {
             const msg =
                 err?.response?.data?.message ||
                 "Password reset failed";
-            schadenToast.error(msg, {
+            shadcnToast.error(msg, {
                 duration: 4000,
                 position: "top-center",
             });

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { FaBookmark } from "react-icons/fa6";
 import { FaStar } from "react-icons/fa";
-import { schadenToast } from "@/components/schadenToast/ToastConfig.jsx";
+import { shadcnToast } from "@/components/shadcnToast/ToastConfig.jsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -245,7 +245,7 @@ const FindCollege = () => {
             const isSaved = prev.includes(collegeId);
 
             if (!isSaved) {
-                schadenToast.success("College Bookmarked", {
+                shadcnToast.success("College Bookmarked", {
                     duration: 1500,
                     position: "top-center",
                 });

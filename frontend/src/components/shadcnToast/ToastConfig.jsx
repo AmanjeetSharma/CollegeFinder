@@ -66,7 +66,7 @@ const createToast = (type, message, options = {}) => {
 };
 
 
-export const schadenToast = {
+export const shadcnToast = {
   success: (message, options) => createToast("success", message, options),
 
   error: (message, options) => createToast("error", message, options),
