@@ -193,7 +193,7 @@ const Dashboard = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate("/all-tests")}
-                    className="text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                    className="text-slate-900 hover:text-slate-700 hover:bg-slate-100 transition-all duration-200 p-4  cursor-pointer"
                   >
                     View All
                     <ArrowRight className="ml-2 h-3.5 w-3.5" />
@@ -344,18 +344,18 @@ const Dashboard = () => {
                 {hasRunningTest && (
                   <button
                     onClick={() => navigate("/take-test")}
-                    className="w-full group flex items-center justify-between px-5 py-3.5 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-200"
+                    className="w-full group flex items-center justify-between px-5 py-3.5 bg-green-50 hover:bg-green-100 rounded-xl transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <span className="flex h-2.5 w-2.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-blue-700">Test in Progress</span>
+                      <span className="text-sm font-medium text-green-700">Test in Progress...</span>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="h-4 w-4 text-green-700 group-hover:translate-x-1 transition-transform" />
                   </button>
                 )}
 

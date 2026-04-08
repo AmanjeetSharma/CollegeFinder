@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTest } from "../../context/TestContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import PageLoader from "@/utils/PageLoader";
 
 import {
     AlertCircle,
@@ -15,7 +18,12 @@ import {
     ChevronRight,
     Send,
     Maximize2,
-    Minimize2
+    Minimize2,
+    Menu,
+    CheckCircle2,
+    Circle,
+    BookOpen,
+    Clock
 } from "lucide-react";
 
 import TestTimer from "./TestTimer";
@@ -32,19 +40,17 @@ const TakeTest = () => {
     const [currentSection, setCurrentSection] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [loadingTest, setLoadingTest] = useState(true);
+    const [sectionOpen, setSectionOpen] = useState(false);
 
-    // 🔥 LOAD TEST
     useEffect(() => {
         const load = async () => {
             try {
                 const t = await getRunningTest();
-
                 if (!t || t.status !== "in-progress") {
                     shadcnToast.error("No active test found");
                     navigate("/dashboard");
                     return;
                 }
-
                 setTest(t);
                 initializeAnswers(t);
                 enterFullScreen();
@@ -54,69 +60,45 @@ const TakeTest = () => {
                 setLoadingTest(false);
             }
         };
-
         load();
-
-        return () => {
-            exitFullScreen();
-        };
+        return () => exitFullScreen();
     }, []);
-    
+
     useEffect(() => {
         const handleFullScreenExit = () => {
-            if (!document.fullscreenElement) {
-                shadcnToast.warning("Fullscreen is required!", {
-                    description: "Re-entering fullscreen...",
+            if (!document.fullscreenElement && !submitted) {
+                shadcnToast.warning("Focus mode required!", {
+                    description: "Please remain in fullscreen.",
                     duration: 3000
                 });
-
-                // force back after small delay
-                setTimeout(() => {
-                    enterFullScreen();
-                }, 1000);
+                setTimeout(() => enterFullScreen(), 1000);
             }
         };
-
         document.addEventListener("fullscreenchange", handleFullScreenExit);
-
-        return () => {
-            document.removeEventListener("fullscreenchange", handleFullScreenExit);
-        };
-    }, [enterFullScreen]);
+        return () => document.removeEventListener("fullscreenchange", handleFullScreenExit);
+    }, [enterFullScreen, submitted]);
 
     const initializeAnswers = (t) => {
         const obj = {};
-
         t.sections.forEach((section, sIdx) => {
             obj[sIdx] = {};
             section.questions.forEach((q, qIdx) => {
                 obj[sIdx][qIdx] = q.userAnswer || "";
             });
         });
-
         setAnswers(obj);
     };
 
     const handleAnswerChange = (sIdx, qIdx, value) => {
         setAnswers(prev => ({
             ...prev,
-            [sIdx]: {
-                ...prev[sIdx],
-                [qIdx]: value
-            }
+            [sIdx]: { ...prev[sIdx], [qIdx]: value }
         }));
-    };
-
-    const handleTimeUp = async () => {
-        shadcnToast.warning("Time up! Auto submitting...");
-        await handleSubmit(true);
     };
 
     const handleSubmit = async () => {
         if (submitted || !test) return;
-
         setSubmitted(true);
-
         const formatted = test.sections.map((section, sIdx) => ({
             sectionName: section.sectionName,
             questions: section.questions.map((q, qIdx) => ({
@@ -124,13 +106,8 @@ const TakeTest = () => {
                 userAnswer: answers[sIdx]?.[qIdx] || null
             }))
         }));
-
         try {
-            await submitTest({
-                testId: test._id,
-                answers: formatted
-            });
-
+            await submitTest({ testId: test._id, answers: formatted });
             exitFullScreen();
             navigate(`/test-result/${test._id}`);
         } catch (err) {
@@ -138,123 +115,266 @@ const TakeTest = () => {
         }
     };
 
-    if (loadingTest) {
-        return <div className="p-10 text-center">Loading test...</div>;
-    }
-
-    if (!test) {
-        return <div className="p-10 text-center">No test found</div>;
-    }
-
-    const totalQuestions = test.sections.reduce(
-        (acc, s) => acc + s.questions.length,
-        0
+    if (loadingTest) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <PageLoader />
+        </div>
     );
 
-    const answered = Object.values(answers).reduce(
-        (acc, sec) => acc + Object.values(sec).filter(v => v).length,
-        0
-    );
+    if (!test) return null;
 
-    const progress = (answered / totalQuestions) * 100;
-
-    const section = test.sections[currentSection];
+    const totalQuestions = test.sections.reduce((acc, s) => acc + s.questions.length, 0);
+    const answeredCount = Object.values(answers).reduce((acc, sec) => acc + Object.values(sec).filter(v => v).length, 0);
+    const progress = (answeredCount / totalQuestions) * 100;
+    const currentSectionData = test.sections[currentSection];
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            {/* HEADER */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">Test</h2>
+        <div className="min-h-screen bg-zinc-50/50 flex flex-col selection:bg-zinc-900 selection:text-white">
 
-                <div className="flex gap-3 items-center">
-                    <TestTimer onTimeUp={handleTimeUp} />
-
-                    <Button onClick={isFullScreen ? exitFullScreen : enterFullScreen}>
-                        {isFullScreen ? <Minimize2 /> : <Maximize2 />}
-                    </Button>
-
-                    <Button onClick={handleSubmit} disabled={submitted || loading}>
-                        <Send className="mr-2 h-4 w-4" />
-                        Submit
-                    </Button>
-                </div>
-            </div>
-
-            {/* PROGRESS */}
-            <Progress value={progress} className="mb-4" />
-
-            {/* SECTION NAV */}
-            <div className="flex gap-2 mb-4">
-                {test.sections.map((s, i) => (
-                    <Button
-                        key={i}
-                        variant={i === currentSection ? "default" : "outline"}
-                        onClick={() => setCurrentSection(i)}
-                    >
-                        {s.sectionName}
-                    </Button>
-                ))}
-            </div>
-
-            {/* QUESTIONS */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>{section.sectionName}</CardTitle>
-                </CardHeader>
-
-                <CardContent>
-                    {section.questions.map((q, idx) => (
-                        <div key={idx} className="mb-6">
-                            <p className="font-medium mb-2">
-                                {idx + 1}. {q.question}
-                            </p>
-
-                            <RadioGroup
-                                value={answers[currentSection]?.[idx] || ""}
-                                onValueChange={(val) =>
-                                    handleAnswerChange(currentSection, idx, val)
-                                }
-                            >
-                                {q.options.map((opt, i) => (
-                                    <div key={i} className="flex gap-2 items-center">
-                                        <RadioGroupItem value={opt} id={`${idx}-${i}`} />
-                                        <Label htmlFor={`${idx}-${i}`}>{opt}</Label>
-                                    </div>
-                                ))}
-                            </RadioGroup>
+            {/* --- Top Navigation Bar --- */}
+            <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-zinc-200">
+                <div className="max-w-[1400px] mx-auto px-4 h-16 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <Sheet open={sectionOpen} onOpenChange={setSectionOpen}>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" size="icon" className="lg:hidden rounded-full">
+                                    <Menu className="h-4 w-4" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="left" className="w-[300px] p-0">
+                                <SheetHeader className="p-6 border-b">
+                                    <SheetTitle className="text-sm font-black uppercase tracking-widest">Navigator</SheetTitle>
+                                </SheetHeader>
+                                <div className="p-4 space-y-2">
+                                    <SectionNavList
+                                        test={test}
+                                        answers={answers}
+                                        current={currentSection}
+                                        set={setCurrentSection}
+                                        close={() => setSectionOpen(false)}
+                                    />
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                        <div className="hidden md:block">
+                            <h1 className="text-sm font-black uppercase tracking-tighter italic">EXAM <span className="text-zinc-400">SESSION</span></h1>
                         </div>
-                    ))}
-                </CardContent>
-            </Card>
+                    </div>
 
-            {/* NAV BUTTONS */}
-            <div className="flex justify-between mt-6">
-                <Button
-                    disabled={currentSection === 0}
-                    onClick={() => setCurrentSection(p => p - 1)}
-                >
-                    <ChevronLeft /> Prev
-                </Button>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 px-4 py-1.5 bg-zinc-100 rounded-full border border-zinc-200">
+                            <Clock className="h-3.5 w-3.5 text-zinc-500" />
+                            <TestTimer onTimeUp={() => handleSubmit(true)} />
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={isFullScreen ? exitFullScreen : enterFullScreen}
+                            className="hidden sm:flex rounded-full text-zinc-400 cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-all"
+                        >
+                            {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={submitted || loading}
+                            className="bg-zinc-900 hover:bg-zinc-800 text-white rounded-full px-6 shadow-lg shadow-zinc-200 active:scale-95 transition-all cursor-pointer"
+                        >
+                            <Send className="h-3.5 w-3.5 mr-2" />
+                            Submit
+                        </Button>
+                    </div>
+                </div>
+                <Progress value={progress} className="h-0.5 rounded-none bg-transparent" />
+            </header>
 
-                <Button
-                    disabled={currentSection === test.sections.length - 1}
-                    onClick={() => setCurrentSection(p => p + 1)}
-                >
-                    Next <ChevronRight />
-                </Button>
-            </div>
+            <main className="flex-1 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 p-4 md:p-8">
 
-            {/* WARNING */}
-            {answered < totalQuestions && (
-                <Alert className="mt-4">
-                    <AlertCircle />
-                    <AlertDescription>
-                        {totalQuestions - answered} unanswered questions
-                    </AlertDescription>
-                </Alert>
-            )}
+                {/* --- Sidebar (Desktop Only) --- */}
+                <aside className="hidden lg:block lg:col-span-3 space-y-6">
+                    <div className="sticky top-28 space-y-6">
+                        <div className="space-y-2">
+                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">Structure</p>
+                            <SectionNavList
+                                test={test}
+                                answers={answers}
+                                current={currentSection}
+                                set={setCurrentSection}
+                            />
+                        </div>
+
+                        <Card className="border-none shadow-2xl bg-zinc-900 text-white overflow-hidden rounded-[2rem] relative group">
+                            {/* Subtle Accent Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+
+                            <CardContent className="p-8 flex flex-col items-center justify-center text-center space-y-4 relative z-10">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                                        Progress Status
+                                    </p>
+                                    <h3 className="text-3xl font-black italic tracking-tighter">
+                                        {Math.round(progress)}%
+                                    </h3>
+                                </div>
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-zinc-300 uppercase tracking-tight">
+                                    <BookOpen className="h-3 w-3 text-zinc-400" />
+                                    <span>{answeredCount} <span className="text-zinc-500 mx-1">/</span> {totalQuestions} Solved</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </aside>
+
+                {/* --- Question Content --- */}
+                <section className="lg:col-span-9 space-y-4 pb-20">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentSection}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                        >
+                            <div className="flex items-center justify-between mb-4 px-1"> {/* Reduced mb from 6 to 4 */}
+                                <div>
+                                    <h2 className="text-xl font-black tracking-tight text-zinc-900">{currentSectionData.sectionName}</h2> {/* Reduced text size */}
+                                    <p className="text-[12px] text-zinc-400">Select the appropriate answer below.</p>
+                                </div>
+                                <div className="hidden sm:block">
+                                    <Badge variant="secondary" className="rounded-full bg-zinc-100 text-zinc-500 font-bold px-2 py-0 text-[10px]">
+                                        Section {currentSection + 1}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3"> {/* Reduced space-y from 4 to 3 */}
+                                {currentSectionData.questions.map((q, qIdx) => (
+                                    <Card key={qIdx} className="border-zinc-200 shadow-none hover:border-zinc-300 transition-all rounded-xl overflow-hidden">
+                                        <CardHeader className="bg-zinc-50/50 py-3 px-4 border-b border-zinc-100"> {/* Reduced py and px */}
+                                            <div className="flex gap-3"> {/* Reduced gap from 4 to 3 */}
+                                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-zinc-900 text-white text-[10px] font-bold italic">
+                                                    {qIdx + 1}
+                                                </span>
+                                                <p className="font-bold text-zinc-800 text-sm leading-snug pt-0.5"> {/* Reduced text size */}
+                                                    {q.question}
+                                                </p>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="p-3 px-4"> {/* Reduced p from 6 to 3 */}
+                                            <RadioGroup
+                                                value={answers[currentSection]?.[qIdx] || ""}
+                                                onValueChange={(val) => handleAnswerChange(currentSection, qIdx, val)}
+                                                className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+                                            >
+                                                {q.options.map((opt, optIdx) => (
+                                                    <div key={optIdx}>
+                                                        <RadioGroupItem
+                                                            value={opt}
+                                                            id={`q${qIdx}-o${optIdx}`}
+                                                            className="sr-only"
+                                                        />
+                                                        <Label
+                                                            htmlFor={`q${qIdx}-o${optIdx}`}
+                                                            className={`flex items-center gap-2.5 p-2.5 rounded-lg border transition-all cursor-pointer group ${answers[currentSection]?.[qIdx] === opt
+                                                                ? "border-zinc-900 bg-zinc-900/[0.02] ring-1 ring-zinc-900"
+                                                                : "border-zinc-100 bg-white hover:border-zinc-200"
+                                                                }`}
+                                                        >
+                                                            <div className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center transition-all ${answers[currentSection]?.[qIdx] === opt ? "border-zinc-900 bg-zinc-900" : "border-zinc-300 group-hover:border-zinc-400"
+                                                                }`}>
+                                                                <div className="h-1 w-1 rounded-full bg-white" />
+                                                            </div>
+                                                            <span className={`text-xs font-semibold transition-colors ${answers[currentSection]?.[qIdx] === opt ? "text-zinc-900" : "text-zinc-500"
+                                                                }`}>
+                                                                {opt}
+                                                            </span>
+                                                        </Label>
+                                                    </div>
+                                                ))}
+                                            </RadioGroup>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
+
+                    {/* Bottom Navigation */}
+                    <div className="flex items-center justify-between gap-4 pt-6 border-t border-zinc-200 mt-10">
+                        <Button
+                            variant="ghost"
+                            disabled={currentSection === 0}
+                            onClick={() => {
+                                setCurrentSection(p => p - 1);
+                                window.scrollTo(0, 0);
+                            }}
+                            className="h-12 px-6 rounded-full font-bold text-zinc-500"
+                        >
+                            <ChevronLeft className="h-4 w-4 mr-2" />
+                            Previous
+                        </Button>
+
+                        <div className="flex gap-2">
+                            {answeredCount < totalQuestions && (
+                                <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 px-4 py-2 rounded-full border border-amber-100">
+                                    <AlertCircle className="h-3.5 w-3.5" />
+                                    {totalQuestions - answeredCount} Pending
+                                </div>
+                            )}
+                            <Button
+                                variant="outline"
+                                disabled={currentSection === test.sections.length - 1}
+                                onClick={() => {
+                                    setCurrentSection(p => p + 1);
+                                    window.scrollTo(0, 0);
+                                }}
+                                className="h-12 px-8 rounded-full border-zinc-200 font-bold"
+                            >
+                                Next Section
+                                <ChevronRight className="h-4 w-4 ml-2" />
+                            </Button>
+                        </div>
+                    </div>
+                </section>
+            </main>
         </div>
     );
 };
+
+// --- Sub-component for Navigation List ---
+const SectionNavList = ({ test, answers, current, set, close }) => (
+    <div className="space-y-1">
+        {test.sections.map((s, i) => {
+            const solved = Object.values(answers[i] || {}).filter(v => v).length;
+            const total = s.questions.length;
+            const isDone = solved === total;
+
+            return (
+                <button
+                    key={i}
+                    onClick={() => {
+                        set(i);
+                        if (close) close();
+                    }}
+                    className={`w-full group flex items-center justify-between p-3.5 rounded-xl transition-all cursor-pointer ${i === current
+                        ? "bg-white border-2 border-zinc-900 shadow-sm"
+                        : "border-2 border-transparent bg-zinc-100 hover:bg-zinc-200"
+                        }`}
+                >
+                    <div className="flex items-center gap-3">
+                        {isDone ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        ) : (
+                            <Circle className={`h-4 w-4 ${i === current ? "text-zinc-900" : "text-zinc-300"}`} />
+                        )}
+                        <span className={`text-xs font-bold uppercase tracking-tight ${i === current ? "text-zinc-900" : "text-zinc-500"}`}>
+                            {s.sectionName}
+                        </span>
+                    </div>
+                    <span className="text-[10px] font-black text-zinc-400">{solved}/{total}</span>
+                </button>
+            );
+        })}
+    </div>
+);
 
 export default TakeTest;

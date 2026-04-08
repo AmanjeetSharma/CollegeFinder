@@ -45,8 +45,6 @@ const Suggestion = lazy(() => import("../pages/user/Suggestion"));
 const FindCollege = lazy(() => import("../pages/college/FindCollege"));
 const CollegeDetails = lazy(() => import("../pages/college/CollegeDetails"));
 
-import TestLoader from "@/components/test/testLoader/TestLoader";
-
 const AppRoutes = () => {
     return (
         <Routes>

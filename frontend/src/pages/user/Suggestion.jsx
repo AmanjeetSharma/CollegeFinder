@@ -2,20 +2,28 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCollege } from "../../context/CollegeContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-    ArrowLeft, 
-    MapPin, 
-    School, 
-    Sparkles, 
-    CheckCircle2, 
-    Target, 
-    Scale, 
-    AlertTriangle, 
+import {
+    ArrowLeft,
+    MapPin,
+    School,
+    Sparkles,
+    CheckCircle2,
+    Target,
+    Scale,
+    AlertTriangle,
     XCircle,
     Search,
     TrendingUp,
@@ -34,37 +42,37 @@ const Suggestion = () => {
 
     useEffect(() => {
         const loadFilters = async () => {
-            try { await getFilters(); } 
+            try { await getFilters(); }
             catch (err) { console.error("Failed to load filters", err); }
         };
         loadFilters();
     }, []);
 
     const getAdmissionStatus = (diff) => {
-        if (diff >= 10) return { 
-            label: "Safe", icon: <CheckCircle2 className="h-4 w-4" />, 
+        if (diff >= 10) return {
+            label: "Secured", icon: <CheckCircle2 className="h-4 w-4" />,
             color: "text-emerald-600", bg: "bg-emerald-50", bar: "bg-emerald-500",
-            desc: "High probability of admission." 
+            desc: "High probability of admission."
         };
-        if (diff >= 0) return { 
-            label: "Target", icon: <Target className="h-4 w-4" />, 
+        if (diff >= 0) return {
+            label: "Target", icon: <Target className="h-4 w-4" />,
             color: "text-blue-600", bg: "bg-blue-50", bar: "bg-blue-500",
-            desc: "Good chance of selection." 
+            desc: "Good chance of selection."
         };
-        if (diff >= -10) return { 
-            label: "Slight Risk", icon: <Scale className="h-4 w-4" />, 
+        if (diff >= -10) return {
+            label: "Slight Risk", icon: <Scale className="h-4 w-4" />,
             color: "text-amber-600", bg: "bg-amber-50", bar: "bg-amber-500",
-            desc: "Admission is uncertain." 
+            desc: "Admission is uncertain."
         };
-        if (diff >= -30) return { 
-            label: "Reach", icon: <AlertTriangle className="h-4 w-4" />, 
+        if (diff >= -30) return {
+            label: "Reach", icon: <AlertTriangle className="h-4 w-4" />,
             color: "text-orange-600", bg: "bg-orange-50", bar: "bg-orange-500",
-            desc: "Competitive; very difficult." 
+            desc: "Competitive; very difficult."
         };
-        return { 
-            label: "Dream", icon: <XCircle className="h-4 w-4" />, 
+        return {
+            label: "Dream", icon: <XCircle className="h-4 w-4" />,
             color: "text-red-600", bg: "bg-red-50", bar: "bg-red-500",
-            desc: "Admission is unlikely." 
+            desc: "Admission is unlikely."
         };
     };
 
@@ -87,7 +95,7 @@ const Suggestion = () => {
     return (
         <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 selection:bg-primary/10 pb-20">
             <div className="max-w-6xl mx-auto px-4 py-6 md:py-10">
-                
+
                 {/* Slim Header */}
                 <div className="flex items-center justify-between mb-8">
                     <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="h-8 px-2 text-zinc-500 hover:text-zinc-900">
@@ -100,7 +108,7 @@ const Suggestion = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    
+
                     {/* Left: Search & Filters Sidebar */}
                     <div className="lg:col-span-4 space-y-6">
                         <div className="space-y-2">
@@ -108,24 +116,41 @@ const Suggestion = () => {
                             <p className="text-sm text-zinc-500">Discover institutions matching your academic profile.</p>
                         </div>
 
+
+
                         <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-5">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">Region Selection</label>
-                                <select
-                                    className="w-full bg-white border border-zinc-200 p-3 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none cursor-pointer"
-                                    value={selectedState}
-                                    onChange={(e) => setSelectedState(e.target.value)}
-                                >
-                                    <option value="">Select Target State</option>
-                                    {filters?.states?.map((state, idx) => (
-                                        <option key={idx} value={state}>{state}</option>
-                                    ))}
-                                </select>
+                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-wider ml-1">
+                                    Region Selection
+                                </label>
+
+                                <Select value={selectedState} onValueChange={(value) => setSelectedState(value)}>
+                                    <SelectTrigger className="w-full bg-white border-zinc-200 h-12 rounded-xl text-sm focus:ring-2 focus:ring-zinc-900/10 outline-none transition-all shadow-sm">
+                                        <SelectValue placeholder="Select Target State" />
+                                    </SelectTrigger>
+                                    <SelectContent
+                                        position="popper"
+                                        sideOffset={5}
+                                        className="rounded-xl border-zinc-200 shadow-xl max-h-75 w-[--radix-select-trigger-width] bg-white z-100"
+                                    >
+                                        <ScrollArea className="h-full w-full"> {/* Optional: add if you have many states */}
+                                            {filters?.states?.map((state, idx) => (
+                                                <SelectItem
+                                                    key={idx}
+                                                    value={state}
+                                                    className="py-2.5 rounded-lg focus:bg-zinc-100 cursor-pointer transition-colors"
+                                                >
+                                                    {state}
+                                                </SelectItem>
+                                            ))}
+                                        </ScrollArea>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
-                            <Button 
-                                className="w-full h-12 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl shadow-xl shadow-zinc-200 transition-all active:scale-[0.98]"
-                                onClick={handleSubmit} 
+                            <Button
+                                className="w-full h-12 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl shadow-xl shadow-zinc-200 transition-all active:scale-[0.98] font-bold"
+                                onClick={handleSubmit}
                                 disabled={loading}
                             >
                                 {loading ? "Analyzing Data..." : "Generate Recommendations"}
@@ -138,7 +163,7 @@ const Suggestion = () => {
                                     <TrendingUp className="h-3 w-3" /> Admission Insights
                                 </div>
                                 <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
-                                    Our AI evaluated <strong>{suggestionData.total_colleges_evaluated}</strong> institutions in {selectedState}. 
+                                    Our AI evaluated <strong>{suggestionData.total_colleges_evaluated}</strong> institutions in {selectedState}.
                                     Predictions are based on your most recent test performance.
                                 </p>
                             </div>
@@ -149,9 +174,9 @@ const Suggestion = () => {
                     <div className="lg:col-span-8 space-y-6">
                         <AnimatePresence mode="wait">
                             {!suggestionData && !loading ? (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                    className="h-[400px] flex flex-col items-center justify-center border border-dashed border-zinc-200 rounded-3xl bg-zinc-50/50 text-zinc-400"
+                                    className="h-100 flex flex-col items-center justify-center border border-dashed border-zinc-200 rounded-3xl bg-zinc-50/50 text-zinc-400"
                                 >
                                     <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
                                         <Search className="h-6 w-6 opacity-20" />
@@ -160,12 +185,12 @@ const Suggestion = () => {
                                 </motion.div>
                             ) : loading ? (
                                 <div className="space-y-4">
-                                    {[1, 2, 3].map(i => (
-                                        <div key={i} className="h-32 w-full bg-zinc-100 animate-pulse rounded-2xl" />
+                                    {[1, 2, 3, 4].map(i => (
+                                        <div key={i} className="h-32 w-full bg-zinc-200 animate-pulse rounded-2xl" />
                                     ))}
                                 </div>
                             ) : (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                                     className="space-y-6"
                                 >
@@ -233,9 +258,9 @@ const Suggestion = () => {
                                                                                 {college.score_difference > 0 ? "+" : ""}{college.score_difference}%
                                                                             </span>
                                                                         </div>
-                                                                        <Progress 
-                                                                            value={Math.min(Math.max((college.suitability_score * 100), 10), 100)} 
-                                                                            className="h-1.5 bg-white shadow-inner" 
+                                                                        <Progress
+                                                                            value={Math.min(Math.max((college.suitability_score * 100), 10), 100)}
+                                                                            className="h-1.5 bg-white shadow-inner"
                                                                         />
                                                                     </div>
                                                                 </div>
@@ -246,9 +271,9 @@ const Suggestion = () => {
                                             );
                                         })}
                                     </div>
-                                    
+
                                     <div className="pt-8 flex justify-center">
-                                        <Button variant="outline" onClick={() => navigate("/dashboard")} className="rounded-xl px-8 h-12 text-zinc-500 border-zinc-200 cursor-pointer hover:text-zinc-900 hover:border-zinc-300 hover:bg-black hover:text-white  transition-all group">
+                                        <Button variant="outline" onClick={() => navigate("/dashboard")} className="rounded-xl px-8 h-12 text-zinc-500 border-zinc-200 cursor-pointer hover:text-zinc-900 hover:border-zinc-300 hover:bg-black  transition-all group">
                                             <LayoutDashboard className="mr-2 h-4 w-4" /> Return to Dashboard
                                         </Button>
                                     </div>
