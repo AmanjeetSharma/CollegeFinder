@@ -26,7 +26,7 @@ const userSchema = new Schema(
       required: true,
       trim: true,
       minlength: [3, 'Name must be at least 3 characters long'],
-      maxlength: [30, 'Name cannot exceed 50 characters']
+      maxlength: [30, 'Name cannot exceed 30 characters']
     },
     email: {
       type: String,
@@ -61,20 +61,22 @@ const userSchema = new Schema(
     sessions: [sessionSchema],
     address: addressSchema,
 
-        class:{
+    class: {
       type: String,
       enum: ["9th", "10th", "11th", "12th"],
 
     },
 
-    score:{
-      type:mongoose.Schema.Types.Mixed, // Can store scores for different subjects as an object
+    score: {
+      type: mongoose.Schema.Types.Mixed, // Can store scores for different subjects as an object
       default: {}
     }
 
-    
-  }
+
+  }, {
+  timestamps: true,// Automatically adds createdAt and updatedAt fields
+}
 );
 
-export const User = 
-    mongoose.models.User || mongoose.model("User", userSchema);
+export const User =
+  mongoose.models.User || mongoose.model("User", userSchema);
