@@ -4,7 +4,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Result } from "../models/result.model.js";
-import { set } from "mongoose";
 
 
 
@@ -33,8 +32,8 @@ const generateTest = asyncHandler(async (req, res) => {
   }
 
 
-  await new Promise(r => setTimeout(r, 10000));
-  return;// temporary to avoid hitting gemini limits during development
+  // await new Promise(r => setTimeout(r, 10000)); // to test loader and retry logic without hitting gemini limits during development
+  // return;// temporary to avoid hitting gemini limits during development
 
   // generating test using gemini
   const aiResponse = await generateFinanceQuery({ studentClass, interest });
