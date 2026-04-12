@@ -93,6 +93,8 @@ CollegeFinder/
 |- backend/    # Express API, MongoDB models, auth, test engine, college APIs
 |- frontend/   # React app, routes, pages, contexts, UI components
 `- README.md
+```
+
 
 ## Key Modules
 
