@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTest } from "../../context/TestContext";
 import { motion as Motion, AnimatePresence } from "framer-motion";
@@ -18,7 +18,6 @@ import {
     ChevronRight,
     Send,
     Maximize2,
-    Minimize2,
     Menu,
     CheckCircle2,
     Circle,
@@ -45,6 +44,20 @@ const TakeTest = () => {
     const [loadingTest, setLoadingTest] = useState(true);
     const [sectionOpen, setSectionOpen] = useState(false);
     const [initialTime, setInitialTime] = useState(3600); // Default 1 hour
+    const [focusModeRequired, setFocusModeRequired] = useState(false);
+    const submittedRef = useRef(false);
+    const lastFocusWarningRef = useRef(0);
+
+    const warnFocusLoss = (description = "Please return to fullscreen to continue your test.") => {
+        const now = Date.now();
+        if (now - lastFocusWarningRef.current < 2500) return;
+
+        lastFocusWarningRef.current = now;
+        shadcnToast.warning("Focus mode required!", {
+            description,
+            duration: 3500
+        });
+    };
 
     useEffect(() => {
         const load = async () => {
@@ -67,7 +80,8 @@ const TakeTest = () => {
 
                 setTest(t);
                 initializeAnswers(t);
-                enterFullScreen();
+                const enteredFullScreen = await enterFullScreen();
+                setFocusModeRequired(!enteredFullScreen);
 
                 // Set initial time from remainingTime or calculate from totalTime
                 if (t.remainingTime !== undefined) {
@@ -89,18 +103,56 @@ const TakeTest = () => {
     }, []);
 
     useEffect(() => {
+        submittedRef.current = submitted;
+    }, [submitted]);
+
+    useEffect(() => {
         const handleFullScreenExit = () => {
-            if (!document.fullscreenElement && !submitted) {
-                shadcnToast.warning("Focus mode required!", {
-                    description: "Please remain in fullscreen.",
-                    duration: 3000
-                });
-                setTimeout(() => enterFullScreen(), 1000);
+            if (document.fullscreenElement) {
+                setFocusModeRequired(false);
+                return;
+            }
+
+            if (test && !submittedRef.current) {
+                setFocusModeRequired(true);
+                warnFocusLoss("Warning: You left fullscreen. Re-enter test mode to continue.");
             }
         };
+
+        const handleVisibilityChange = () => {
+            if (document.hidden && test && !submittedRef.current) {
+                warnFocusLoss("Warning: You left the test tab. Re-enter test mode to continue.");
+            }
+        };
+
+        const handleWindowBlur = () => {
+            if (test && !submittedRef.current) {
+                warnFocusLoss("Warning: You left the test window. Re-enter test mode to continue.");
+            }
+        };
+
         document.addEventListener("fullscreenchange", handleFullScreenExit);
-        return () => document.removeEventListener("fullscreenchange", handleFullScreenExit);
-    }, [enterFullScreen, submitted]);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        window.addEventListener("blur", handleWindowBlur);
+
+        return () => {
+            document.removeEventListener("fullscreenchange", handleFullScreenExit);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            window.removeEventListener("blur", handleWindowBlur);
+        };
+    }, [test]);
+
+    const handleEnterFocusMode = async () => {
+        const enteredFullScreen = await enterFullScreen();
+
+        if (enteredFullScreen) {
+            setFocusModeRequired(false);
+            return;
+        }
+
+        setFocusModeRequired(true);
+        warnFocusLoss("Your browser blocked fullscreen. Click the focus mode button again.");
+    };
 
     const initializeAnswers = (t) => {
         const obj = {};
@@ -160,6 +212,7 @@ const TakeTest = () => {
     const handleSubmit = async () => {
         if (submitted || !test) return;
         setSubmitted(true);
+        submittedRef.current = true;
         const formatted = test.sections.map((section, sIdx) => ({
             sectionName: section.sectionName,
             questions: section.questions.map((q, qIdx) => ({
@@ -172,6 +225,7 @@ const TakeTest = () => {
             exitFullScreen();
             navigate(`/test-result/${test._id}`);
         } catch {
+            submittedRef.current = false;
             setSubmitted(false);
             shadcnToast.error("Failed to submit test. Please try again.");
         }
@@ -210,7 +264,7 @@ const TakeTest = () => {
                                     <Menu className="h-4 w-4" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="w-[300px] p-0">
+                            <SheetContent side="left" className="w-75 p-0">
                                 <SheetHeader className="p-6 border-b">
                                     <SheetTitle className="text-sm font-black uppercase tracking-widest">Navigator</SheetTitle>
                                 </SheetHeader>
@@ -240,10 +294,11 @@ const TakeTest = () => {
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={isFullScreen ? exitFullScreen : enterFullScreen}
+                            onClick={handleEnterFocusMode}
+                            disabled={isFullScreen}
                             className="hidden sm:flex rounded-full text-zinc-400 cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-all"
                         >
-                            {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                            <Maximize2 className="h-4 w-4" />
                         </Button>
                         <Button
                             onClick={handleSubmit}
@@ -257,6 +312,31 @@ const TakeTest = () => {
                 </div>
                 <Progress value={progress} className="h-0.5 rounded-none bg-transparent" />
             </header>
+
+            {focusModeRequired && !submitted && (
+                <div className="fixed inset-0 z-50 bg-zinc-950/90 backdrop-blur-sm flex items-center justify-center p-6">
+                    <Card className="w-full max-w-md border-white/10 bg-white shadow-2xl rounded-2xl">
+                        <CardContent className="p-8 text-center space-y-5">
+                            <div className="mx-auto h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center">
+                                <AlertCircle className="h-6 w-6 text-amber-600" />
+                            </div>
+                            <div className="space-y-2">
+                                <h2 className="text-xl font-black tracking-tight text-zinc-900">Please Enter Test Mode</h2>
+                                <p className="text-sm font-medium text-zinc-500">
+                                    The test must stay in fullscreen. Re-enter test mode to continue.
+                                </p>
+                            </div>
+                            <Button
+                                onClick={handleEnterFocusMode}
+                                className="w-full rounded-full bg-zinc-900 text-white hover:bg-zinc-800 font-bold cursor-pointer"
+                            >
+                                <Maximize2 className="h-4 w-4 mr-2" />
+                                Enter Test Mode
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
 
             <main className="flex-1 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 p-4 md:p-8">
 
@@ -292,7 +372,7 @@ const TakeTest = () => {
                                 </div>
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/10 border border-amber-300/20 text-[10px] font-bold text-amber-200 uppercase tracking-tight">
                                     <Bookmark className="h-3 w-3" />
-                                    <span>{reviewCount} Marked</span>
+                                    <span>{reviewCount} Marked for Review</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -349,7 +429,7 @@ const TakeTest = () => {
                                                     ) : (
                                                         <Bookmark className="h-3.5 w-3.5 mr-1.5" />
                                                     )}
-                                                    Review
+                                                    {markedForReview[currentSection]?.[qIdx] ? "Marked" : "Mark for Review"}
                                                 </Button>
                                             </div>
                                         </CardHeader>
@@ -369,7 +449,7 @@ const TakeTest = () => {
                                                         <Label
                                                             htmlFor={`q${qIdx}-o${optIdx}`}
                                                             className={`flex items-center gap-2.5 p-2.5 rounded-lg border transition-all cursor-pointer group ${answers[currentSection]?.[qIdx] === opt
-                                                                ? "border-zinc-900 bg-zinc-900/[0.02] ring-1 ring-zinc-900"
+                                                                ? "border-zinc-900 bg-zinc-900/2 ring-1 ring-zinc-900"
                                                                 : "border-zinc-100 bg-white hover:border-zinc-200"
                                                                 }`}
                                                         >

@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ResponsiveContainer,
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip
 } from "recharts";
 
 import { Button } from "@/components/ui/button";
@@ -19,13 +22,44 @@ import {
   BookOpen,
   ChevronRight,
   TrendingUp,
+  TrendingDown,
   Activity,
-  User
+  User,
+  Minus,
+  BarChart3
 } from "lucide-react";
 
 import { useAuth } from "../../context/AuthContext";
 import { useTest } from "../../context/TestContext";
 import PageLoader from "@/utils/PageLoader";
+
+const buildEfficiencyInsights = ({ peakEfficiency, dropFromPeak, consistencyGap, status }) => {
+  const insights = [];
+
+  if (dropFromPeak >= 20) {
+    insights.push("Performance dropped significantly from peak.");
+  } else if (dropFromPeak > 0) {
+    insights.push("Current efficiency is below peak but still recoverable.");
+  } else if (peakEfficiency > 0) {
+    insights.push("Current efficiency matches the all-time peak.");
+  }
+
+  if (status === "stable") {
+    insights.push("Efficiency is stable.");
+  } else if (status === "improving") {
+    insights.push("Latest attempt improved over the previous score.");
+  } else if (status === "declining") {
+    insights.push("Latest attempt declined from the previous score.");
+  }
+
+  if (consistencyGap <= 10 && peakEfficiency > 0) {
+    insights.push("Strong consistency among top scores.");
+  } else if (consistencyGap >= 25) {
+    insights.push("Top score is far ahead of the next best result.");
+  }
+
+  return insights.length ? insights : ["Complete more tests to unlock efficiency insights."];
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -39,7 +73,13 @@ const Dashboard = () => {
     totalTests: 0,
     completedTests: 0,
     averageScore: 0,
-    growth: 0
+    currentEfficiency: 0,
+    peakEfficiency: 0,
+    dropFromPeak: 0,
+    consistencyGap: 0,
+    performanceStatus: "stable",
+    efficiencyTrend: [],
+    insights: ["Complete more tests to unlock efficiency insights."]
   });
 
   useEffect(() => {
@@ -51,27 +91,55 @@ const Dashboard = () => {
       const tests = await getUserAllTests();
       const completed = tests.filter((t) => t.status === "submitted");
       const inProgress = tests.filter((t) => t.status === "in-progress");
+      const completedChronological = [...completed].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      const efficiencyValues = completedChronological.map(t => Number(t.scores?.aggregate) || 0);
 
       setHasRunningTest(inProgress.length > 0);
 
-      // Growth Logic: Highest - Second Highest
-      let growthVal = 0;
-      if (completed.length >= 2) {
-        const sortedScores = completed
-          .map(t => t.scores?.aggregate || 0)
-          .sort((a, b) => b - a);
-        growthVal = sortedScores[0] - sortedScores[1];
-      }
+      const currentEfficiency = efficiencyValues.at(-1) || 0;
+      const peakEfficiency = efficiencyValues.length > 0 ? Math.max(...efficiencyValues) : 0;
+      const dropFromPeak = Math.max(0, peakEfficiency - currentEfficiency);
+      const uniqueScores = [...new Set(efficiencyValues)].sort((a, b) => b - a);
+      const consistencyGap = uniqueScores.length >= 2 ? uniqueScores[0] - uniqueScores[1] : 0;
+      const previousEfficiency = efficiencyValues.length >= 2 ? efficiencyValues[efficiencyValues.length - 2] : currentEfficiency;
+      const performanceStatus =
+        currentEfficiency > previousEfficiency
+          ? "improving"
+          : currentEfficiency < previousEfficiency
+            ? "declining"
+            : "stable";
+
+      const efficiencyTrend = completedChronological.map((test, index) => ({
+        name: `T${index + 1}`,
+        value: Number(test.scores?.aggregate) || 0,
+        date: test.createdAt ? new Date(test.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : `Test ${index + 1}`
+      }));
 
       const avgScore = completed.length > 0
         ? completed.reduce((sum, t) => sum + (t.scores?.aggregate || 0), 0) / completed.length
         : 0;
 
+      const insights = buildEfficiencyInsights({
+        currentEfficiency,
+        peakEfficiency,
+        dropFromPeak,
+        consistencyGap,
+        status: performanceStatus
+      });
+
       setStats({
         totalTests: tests.length,
         completedTests: completed.length,
         averageScore: Math.round(avgScore),
-        growth: growthVal
+        currentEfficiency,
+        peakEfficiency,
+        dropFromPeak,
+        consistencyGap,
+        performanceStatus,
+        efficiencyTrend,
+        insights
       });
       setRecentTests(completed.slice(0, 3));
     } catch (err) {
@@ -81,13 +149,37 @@ const Dashboard = () => {
     }
   };
 
-  const chartData = [{ value: stats.averageScore, fill: '#18181b' }];
-
   const scoreConfig = (score) => {
     if (score >= 80) return { label: "Elite", bg: "bg-emerald-50", text: "text-emerald-600" };
     if (score >= 60) return { label: "Advanced", bg: "bg-blue-50", text: "text-blue-600" };
     return { label: "Standard", bg: "bg-slate-50", text: "text-slate-600" };
   };
+
+  const performanceConfig = {
+    improving: {
+      label: "Improving",
+      icon: TrendingUp,
+      chip: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      iconClass: "text-emerald-500",
+      line: "#10b981"
+    },
+    stable: {
+      label: "Stable",
+      icon: Minus,
+      chip: "bg-amber-50 text-amber-700 border-amber-100",
+      iconClass: "text-amber-500",
+      line: "#f59e0b"
+    },
+    declining: {
+      label: "Declining",
+      icon: TrendingDown,
+      chip: "bg-rose-50 text-rose-700 border-rose-100",
+      iconClass: "text-rose-500",
+      line: "#ef4444"
+    }
+  };
+  const status = performanceConfig[stats.performanceStatus] || performanceConfig.stable;
+  const StatusIcon = status.icon;
 
   if (loading) return <PageLoader />;
 
@@ -147,10 +239,141 @@ const Dashboard = () => {
           <StatCard icon={<BookOpen className="text-blue-600" />} label="Attempts" value={stats.totalTests} color="bg-blue-50" />
         </div>
 
-        {/* --- Main Section --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* --- Aggregate Efficiency Analytics --- */}
+        <Card className="border-none shadow-xl shadow-zinc-200/60 bg-white rounded-[2rem] overflow-hidden">
+          <CardHeader className="p-6 sm:p-8 border-b border-zinc-100">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <CardDescription className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                  Aggregate Efficiency
+                </CardDescription>
+                <CardTitle className="text-2xl font-black tracking-tight text-zinc-900 mt-1">
+                  Performance Analytics
+                </CardTitle>
+              </div>
+              <Badge variant="outline" className={`w-fit rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-widest ${status.chip}`}>
+                <StatusIcon className={`h-3.5 w-3.5 mr-1.5 ${status.iconClass}`} />
+                {status.label}
+              </Badge>
+            </div>
+          </CardHeader>
 
-          <div className="lg:col-span-8">
+          <CardContent className="p-6 sm:p-8 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <EfficiencyKpiCard
+                label="Current Efficiency"
+                value={`${stats.currentEfficiency}%`}
+                icon={<Activity className="h-4 w-4 text-zinc-100" />}
+                tone="bg-zinc-900 text-white"
+                caption="Latest aggregate"
+              />
+              <EfficiencyKpiCard
+                label="Peak Efficiency"
+                value={`${stats.peakEfficiency}%`}
+                icon={<Trophy className="h-4 w-4 text-amber-500" />}
+                caption="Highest aggregate"
+              />
+              <EfficiencyKpiCard
+                label="Drop from Peak"
+                value={`${stats.dropFromPeak}%`}
+                icon={<TrendingDown className="h-4 w-4 text-rose-500" />}
+                caption="Peak minus current"
+              />
+              <EfficiencyKpiCard
+                label="Consistency Gap"
+                value={`${stats.consistencyGap}%`}
+                icon={<BarChart3 className="h-4 w-4 text-blue-500" />}
+                caption="Best minus next unique"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-8 rounded-3xl border border-zinc-100 bg-zinc-950 p-5 sm:p-6 shadow-inner">
+                <div className="flex items-center justify-between gap-4 mb-6">
+                  <div>
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Trend Visualization</p>
+                    <h3 className="text-lg font-black text-white tracking-tight">Efficiency Over Time</h3>
+                  </div>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase">
+                    {stats.efficiencyTrend.length} point{stats.efficiencyTrend.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                <div className="h-72">
+                  {stats.efficiencyTrend.length === 0 ? (
+                    <div className="h-full flex items-center justify-center text-sm font-semibold text-zinc-500">
+                      No submitted test data yet.
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={stats.efficiencyTrend} margin={{ top: 8, right: 8, left: -24, bottom: 8 }}>
+                        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" vertical={false} />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: "#a1a1aa", fontSize: 11, fontWeight: 700 }}
+                        />
+                        <YAxis
+                          domain={[0, 100]}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: "#a1a1aa", fontSize: 11, fontWeight: 700 }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            background: "#ffffff",
+                            border: "1px solid #e4e4e7",
+                            borderRadius: 14,
+                            boxShadow: "0 20px 45px rgba(0,0,0,0.12)"
+                          }}
+                          labelFormatter={(label, payload) => payload?.[0]?.payload?.date || label}
+                          formatter={(value) => [`${value}%`, "Efficiency"]}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke={status.line}
+                          strokeWidth={4}
+                          dot={{ r: 4, fill: status.line, strokeWidth: 2, stroke: "#18181b" }}
+                          activeDot={{ r: 6, fill: status.line, stroke: "#ffffff", strokeWidth: 3 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+
+              <div className="lg:col-span-4 rounded-3xl border border-zinc-100 bg-zinc-50 p-5 sm:p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-9 w-9 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                    <StatusIcon className={`h-4 w-4 ${status.iconClass}`} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Insights</p>
+                    <h3 className="text-base font-black text-zinc-900">Auto Summary</h3>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {stats.insights.map((insight, index) => (
+                    <div
+                      key={index}
+                      className="rounded-2xl bg-white border border-zinc-100 p-4 text-sm font-semibold text-zinc-600 shadow-sm animate-in fade-in slide-in-from-bottom-2"
+                    >
+                      {insight}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* --- Main Section --- */}
+        <div className="grid grid-cols-1 gap-8 items-start">
+
+          <div>
             <Card className="border-none shadow-xl shadow-zinc-200/50 bg-white rounded-[2rem] overflow-hidden">
               <CardHeader className="p-8 border-b border-zinc-50 flex flex-row items-center justify-between">
                 <div className="space-y-1">
@@ -208,52 +431,6 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* Performance Visualization */}
-          <div className="lg:col-span-4">
-            <Card className="border-none shadow-xl bg-white rounded-[2rem] p-8 flex flex-col items-center justify-center">
-              <div className="text-center mb-2">
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Efficiency</p>
-                <h2 className="text-xl font-black italic tracking-tighter text-zinc-900 uppercase">Aggregate</h2>
-              </div>
-
-              <div className="relative w-full h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart
-                    cx="50%" cy="50%"
-                    innerRadius="80%" outerRadius="100%"
-                    barSize={12}
-                    data={chartData}
-                    startAngle={90} endAngle={450}
-                  >
-                    <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-                    <RadialBar
-                      background={{ fill: '#f4f4f5' }}
-                      clockWise
-                      dataKey="value"
-                      cornerRadius={10}
-                    />
-                  </RadialBarChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-black italic tracking-tighter text-zinc-900">{stats.averageScore}%</span>
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5">Average</span>
-                </div>
-              </div>
-
-              <div className="w-full mt-4">
-                <div className="flex justify-between items-center bg-zinc-50 p-4 rounded-2xl border border-zinc-100">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className={`h-4 w-4 ${stats.growth >= 0 ? 'text-emerald-500' : 'text-rose-500'}`} />
-                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Peak Growth</span>
-                  </div>
-                  <span className={`text-xs font-black ${stats.growth >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {stats.growth > 0 ? `+${stats.growth}` : stats.growth}%
-                  </span>
-                </div>
-              </div>
-            </Card>
-          </div>
-
         </div>
       </div>
     </div>
@@ -269,6 +446,25 @@ const StatCard = ({ icon, label, value, badge, color }) => (
     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{label}</p>
     <h3 className="text-xl font-black text-zinc-900 tracking-tighter">{value}</h3>
   </Card>
+);
+
+const EfficiencyKpiCard = ({ label, value, icon, caption, tone = "bg-white text-zinc-900" }) => (
+  <div className={`rounded-3xl border border-zinc-100 p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${tone}`}>
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <p className={`text-[10px] font-black uppercase tracking-widest ${tone.includes("zinc-900") ? "text-zinc-400" : "text-zinc-400"}`}>
+          {label}
+        </p>
+        <h3 className="text-3xl font-black italic tracking-tight mt-2">{value}</h3>
+      </div>
+      <div className={`h-9 w-9 rounded-2xl flex items-center justify-center ${tone.includes("zinc-900") ? "bg-white/10" : "bg-zinc-50"}`}>
+        {icon}
+      </div>
+    </div>
+    <p className={`text-xs font-semibold mt-4 ${tone.includes("zinc-900") ? "text-zinc-400" : "text-zinc-500"}`}>
+      {caption}
+    </p>
+  </div>
 );
 
 export default Dashboard;

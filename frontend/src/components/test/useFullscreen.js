@@ -8,20 +8,24 @@ const useFullScreen = () => {
             const elem = document.documentElement;
             if (elem.requestFullscreen) {
                 await elem.requestFullscreen();
+                return true;
             }
         } catch (err) {
             console.warn("Fullscreen not allowed:", err);
         }
+        return false;
     }, []);
 
     const exitFullScreen = useCallback(async () => {
         try {
-            if (document.exitFullscreen) {
+            if (document.fullscreenElement && document.exitFullscreen) {
                 await document.exitFullscreen();
+                return true;
             }
         } catch (err) {
             console.warn("Exit fullscreen failed:", err);
         }
+        return false;
     }, []);
 
     useEffect(() => {
